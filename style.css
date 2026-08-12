@@ -2210,5 +2210,7 @@ MOBILE
         background-position:
             100% 100%;
     }
-
+    .coinButtons {
+        margin-bottom: 100px;
+    }
 }
