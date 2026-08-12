@@ -2104,8 +2104,8 @@ GAME OVER
     .coinButtons {
         margin-bottom: 100px;
     }
-    .gameButton {
-        margin-bottom: 100px;
+    #playerActions {
+        margin-bottom: 150px;
     }
 
 }
@@ -2220,7 +2220,8 @@ MOBILE
     .coinButtons {
         margin-bottom: 100px;
     }
-    .gameButton {
-        margin-bottom: 100px;
+    #playerActions {
+        margin-bottom: 150px;
     }
+
 }

@@ -4968,193 +4968,208 @@ window.addEventListener(
 
 
 // =========================================================
-// DESKTOP PARALLAX
+// PARALLAX OPTIMIZED FOR DESKTOP + MOBILE
+// =========================================================
+
+let parallaxX = 0
+let parallaxY = 0
+
+let parallaxRunning = false
+
+const isMobile =
+    window.matchMedia(
+        '(max-width: 768px)'
+    ).matches
+
+
+function updateParallax() {
+
+    if (!rect)
+        return
+
+
+    const centerX =
+        isMobile
+            ? window.innerWidth / 2
+            : rect.left + rect.width / 2
+
+
+    const centerY =
+        isMobile
+            ? window.innerHeight / 2
+            : rect.top + rect.height / 2
+
+
+    const posX =
+        (parallaxX - centerX) / centerX
+
+
+    const posY =
+        (parallaxY - centerY) / centerY
+
+
+    // =====================================================
+    // BACKGROUND
+    // =====================================================
+
+    if (background) {
+
+        background.style.backgroundPosition =
+            `calc(50% + ${-posX * 20}px)
+             calc(50% + ${-posY * 10}px)`
+    }
+
+
+    // =====================================================
+    // TABLE
+    // =====================================================
+
+    if (table) {
+
+        table.style.backgroundPosition =
+            `calc(50% + ${posX * 5}px)
+             calc(50% + ${posY * 2.5}px)`
+    }
+
+
+    // =====================================================
+    // DESKTOP ONLY
+    // =====================================================
+
+    if (!isMobile) {
+
+        // PLAYER GUN
+
+        if (playerGun) {
+
+            playerGun.style.backgroundPosition =
+                `calc(50% + ${posX * 10}px)
+                 calc(50% + ${posY * 10}px)`
+        }
+
+
+        // PLAYER GUN SELF
+
+        if (playerGunShotHimself) {
+
+            playerGunShotHimself.style.backgroundPosition =
+                `calc(50% + ${posX * 10}px)
+                 calc(50% + ${posY * 10}px)`
+        }
+
+
+        // COIN DOWN
+
+        if (coinDown) {
+
+            coinDown.style.backgroundPosition =
+                `calc(50% + ${posX * 5}px)
+                 calc(50% + ${posY * 2.5}px)`
+        }
+
+
+        // COIN HEAD
+
+        if (coinHead) {
+
+            coinHead.style.backgroundPosition =
+                `calc(50% + ${posX * 6}px)
+                 calc(50% + ${posY * 3}px)`
+        }
+
+
+        // COIN TAILS
+
+        if (coinTails) {
+
+            coinTails.style.backgroundPosition =
+                `calc(50% + ${posX * 6}px)
+                 calc(50% + ${posY * 3}px)`
+        }
+
+
+        // ENEMY
+
+        if (enemy) {
+
+            enemy.style.backgroundPosition =
+                `calc(50% + ${-posX * 5}px)
+                 calc(50% + ${-posY * 2}px)`
+        }
+
+
+        // ENEMY GUN
+
+        if (enemyGunShotPlayer) {
+
+            enemyGunShotPlayer.style.backgroundPosition =
+                `calc(50% + ${-posX * 1.5}px)
+                 calc(50% + ${-posY * 1.5}px)`
+        }
+
+
+        if (enemyGunShotHimself) {
+
+            enemyGunShotHimself.style.backgroundPosition =
+                `calc(50% + ${-posX * 1.5}px)
+                 calc(50% + ${-posY * 1.5}px)`
+        }
+
+    }
+}
+
+
+// =========================================================
+// DESKTOP
 // =========================================================
 
 window.addEventListener(
     'mousemove',
     (e) => {
 
-        if (!rect)
+        if (isMobile)
             return
 
 
-        const centerX =
-            rect.left +
-            rect.width / 2
+        parallaxX =
+            e.clientX
+
+        parallaxY =
+            e.clientY
 
 
-        const centerY =
-            rect.top +
-            rect.height / 2
+        if (parallaxRunning)
+            return
 
 
-        const posX =
-            (
-                e.clientX -
-                centerX
-            ) / centerX
+        parallaxRunning =
+            true
 
 
-        const posY =
-            (
-                e.clientY -
-                centerY
-            ) / centerY
+        requestAnimationFrame(
+            () => {
 
+                parallaxRunning =
+                    false
 
-        // =================================================
-        // PLAYER GUN
-        // =================================================
+                updateParallax()
 
-        if (playerGun) {
-
-            playerGun.style.backgroundPositionX =
-                `calc(50% + ${posX * 10}px)`
-
-            playerGun.style.backgroundPositionY =
-                `calc(50% + ${posY * 10}px)`
-        }
-
-
-        // =================================================
-        // PLAYER GUN SELF
-        // =================================================
-
-        if (playerGunShotHimself) {
-
-            playerGunShotHimself.style.backgroundPositionX =
-                `calc(50% + ${posX * 10}px)`
-
-            playerGunShotHimself.style.backgroundPositionY =
-                `calc(50% + ${posY * 10}px)`
-        }
-
-
-        // =================================================
-        // TABLE
-        // =================================================
-
-        if (table) {
-
-            table.style.backgroundPositionX =
-                `calc(50% + ${posX * 5}px)`
-
-            table.style.backgroundPositionY =
-                `calc(50% + ${posY * 2.5}px)`
-        }
-
-
-        // =================================================
-        // COIN DOWN
-        // =================================================
-
-        if (coinDown) {
-
-            coinDown.style.backgroundPositionX =
-                `calc(50% + ${posX * 5}px)`
-
-            coinDown.style.backgroundPositionY =
-                `calc(50% + ${posY * 2.5}px)`
-        }
-
-
-        // =================================================
-        // COIN HEAD
-        // =================================================
-
-        if (coinHead) {
-
-            coinHead.style.backgroundPositionX =
-                `calc(50% + ${posX * 6}px)`
-
-            coinHead.style.backgroundPositionY =
-                `calc(50% + ${posY * 3}px)`
-        }
-
-
-        // =================================================
-        // COIN TAILS
-        // =================================================
-
-        if (coinTails) {
-
-            coinTails.style.backgroundPositionX =
-                `calc(50% + ${posX * 6}px)`
-
-            coinTails.style.backgroundPositionY =
-                `calc(50% + ${posY * 3}px)`
-        }
-
-
-        // =================================================
-        // BACKGROUND
-        // =================================================
-
-        if (background) {
-
-            background.style.backgroundPositionX =
-                `calc(50% + ${-posX * 20}px)`
-
-            background.style.backgroundPositionY =
-                `calc(50% + ${-posY * 10}px)`
-        }
-
-
-        // =================================================
-        // ENEMY
-        // =================================================
-
-        if (enemy) {
-
-            enemy.style.backgroundPositionX =
-                `calc(50% + ${-posX * 5}px)`
-
-            enemy.style.backgroundPositionY =
-                `calc(50% + ${-posY * 2}px)`
-        }
-
-
-        // =================================================
-        // ENEMY GUN PLAYER
-        // =================================================
-
-        if (enemyGunShotPlayer) {
-
-            enemyGunShotPlayer.style.backgroundPositionX =
-                `calc(50% + ${-posX * 1.5}px)`
-
-            enemyGunShotPlayer.style.backgroundPositionY =
-                `calc(50% + ${-posY * 1.5}px)`
-        }
-
-
-        // =================================================
-        // ENEMY GUN SELF
-        // =================================================
-
-        if (enemyGunShotHimself) {
-
-            enemyGunShotHimself.style.backgroundPositionX =
-                `calc(50% + ${-posX * 1.5}px)`
-
-            enemyGunShotHimself.style.backgroundPositionY =
-                `calc(50% + ${-posY * 1.5}px)`
-        }
+            }
+        )
 
     }
 )
 
 
 // =========================================================
-// MOBILE PARALLAX
+// MOBILE
 // =========================================================
 
 window.addEventListener(
     'touchmove',
     (e) => {
 
-        if (!rect)
+        if (!isMobile)
             return
 
 
@@ -5165,57 +5180,37 @@ window.addEventListener(
             return
 
 
-        const touch =
-            e.touches[0]
+        parallaxX =
+            e.touches[0].clientX
+
+        parallaxY =
+            e.touches[0].clientY
 
 
-        const centerX =
-            window.innerWidth / 2
+        if (parallaxRunning)
+            return
 
 
-        const centerY =
-            window.innerHeight / 2
+        parallaxRunning =
+            true
 
 
-        const posX =
-            (
-                touch.clientX -
-                centerX
-            ) / centerX
+        requestAnimationFrame(
+            () => {
 
+                parallaxRunning =
+                    false
 
-        const posY =
-            (
-                touch.clientY -
-                centerY
-            ) / centerY
+                updateParallax()
 
-
-        if (background) {
-
-            background.style.backgroundPositionX =
-                `calc(50% + ${-posX * 20}px)`
-
-            background.style.backgroundPositionY =
-                `calc(50% + ${-posY * 10}px)`
-        }
-
-
-        if (table) {
-
-            table.style.backgroundPositionX =
-                `calc(50% + ${posX * 5}px)`
-
-            table.style.backgroundPositionY =
-                `calc(50% + ${posY * 2.5}px)`
-        }
+            }
+        )
 
     },
     {
         passive: true
     }
 )
-
 
 // =========================================================
 // START GAME
