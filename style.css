@@ -2068,6 +2068,7 @@ GAME OVER
 
 
 .leaderboard-loading {
+    
     text-align: center;
 
     font-size: 12px;
@@ -2099,6 +2100,9 @@ GAME OVER
         padding: 7px;
 
         font-size: 12px;
+    }
+    .coinButtons {
+        margin-bottom: 100px;
     }
 
 }
