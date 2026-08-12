@@ -2209,7 +2209,7 @@ MOBILE
 
     #gun,
     #gunshotme {
-        transform: translateX(50px) scale(1.3);
+        transform: translateX(50px) translateY(-150px) scale(1.3);
         background-size: auto 50%;
 
         background-repeat: no-repeat;
