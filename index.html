@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Russian Roulette</title>
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         GAME
+    ====================================================== -->
+<!-- =========================================================
+     WELCOME SCREEN
+========================================================= -->
+
+<div id="welcomeScreen">
+
+    <div class="welcomeOverlay"></div>
+
+    <div class="welcomeContent">
+
+        <div class="welcomeSmallTitle">
+            WELCOME TO
+        </div>
+
+        <h1 class="welcomeTitle">
+            RUSSIAN<br>
+            <span>ROULETTE</span>
+        </h1>
+
+        <p class="welcomeDescription">
+            A game of luck, courage and one final decision.
+        </p>
+
+        <div class="experienceInfo">
+
+            <div class="experienceIcon">
+                ◈
+            </div>
+
+            <div>
+                <strong>
+                    Use a desktop browser
+                </strong>
+
+                <span>
+                    and a headset for a better experience.
+                </span>
+            </div>
+
+        </div>
+
+        <div class="usernameSection">
+
+            <label for="welcomeUsername">
+                ENTER YOUR NAME
+            </label>
+
+            <div class="usernameInputWrapper">
+
+                <span class="usernamePrefix">
+                    @
+                </span>
+
+                <input
+                    id="welcomeUsernameInput"
+                    type="text"
+                    maxlength="20"
+                    placeholder="Your username..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+            <p
+                id="welcomeError"
+                class="welcomeError"
+            ></p>
+
+        </div>
+
+        <button
+            id="welcomePlayButton"
+            class="playButton"
+            type="button"
+        >
+            <span>PLAY</span>
+            <span class="playArrow">→</span>
+        </button>
+
+        <button
+            id="changeUsernameButton"
+            class="changeUsernameButton"
+            type="button"
+        >
+            Change username
+        </button>
+
+        <div class="welcomeFooter">
+            <span>GOOD LUCK</span>
+            <span>•</span>
+            <span>YOU WILL NEED IT</span>
+        </div>
+
+    </div>
+
+</div>
+    <div id="game">
+
+        <!-- =================================================
+             GAME HUD
+        ================================================== -->
+
+        <div id="gameHUD">
+
+            <!-- TURN PANEL -->
+
+            <div class="turnPanel">
+                <div class="turnLabel">
+                    CURRENT TURN
+                </div>
+
+                <div id="turnInfo">
+                    WAITING...
+                </div>
+
+                <div id="actionInfo">
+                    Waiting for the coin...
+                </div>
+            </div>
+
+
+            <!-- ROUND / AMMO PANEL -->
+
+            <div class="roundPanel">
+
+                <div class="roundTitle">
+                    ROUND
+                </div>
+
+                <div
+                    class="roundNumberValue"
+                    id="roundNumber"
+                >
+                    Round
+                </div>
+
+                <div class="chamberInfo">
+
+                    <div class="infoBox">
+                        <span class="infoLabel">
+                            CHAMBERS
+                        </span>
+
+                        <strong id="chambersLeft">
+                            6
+                        </strong>
+                    </div>
+
+
+                    <div class="infoBox">
+                        <span class="infoLabel">
+                            BULLETS
+                        </span>
+
+                        <strong id="bulletsLeft">
+                            -
+                        </strong>
+                    </div>
+
+
+                    <div class="infoBox">
+                        <span class="infoLabel">
+                            BLANKS
+                        </span>
+
+                        <strong id="blanksLeft">
+                            -
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ENEMY STATUS -->
+
+            <div class="enemyStatus">
+
+                <div class="enemyStatusTitle">
+                    ENEMY
+                </div>
+
+                <div id="enemyAction">
+                    Waiting...
+                </div>
+
+            </div>
+
+
+            <!-- PLAYER ACTIONS -->
+
+            <div id="playerActions">
+
+                <button
+                    id="shotenemy"
+                    class="gameButton danger"
+                    type="button"
+                    onclick="playerShootEnemy()"
+                >
+                    <span>
+                        SHOOT ENEMY
+                    </span>
+                </button>
+
+
+                <button
+                    id="shotme"
+                    class="gameButton"
+                    type="button"
+                    onclick="playerShootSelf()"
+                >
+                    <span>
+                        SHOOT YOURSELF
+                    </span>
+                </button>
+
+
+                <button
+                    id="playershuffle"
+                    class="gameButton shuffleButton"
+                    type="button"
+                    onclick="playerShuffle()"
+                >
+                    <span>
+                        SHUFFLE
+                    </span>
+
+                    <small>
+                        <span id="shuffleCount">
+                            0
+                        </span>/2
+                    </small>
+                </button>
+
+            </div>
+
+
+            <!-- COIN CHOICES -->
+
+            <div id="coinChoices">
+
+                <div class="coinQuestion">
+                    GUESS THE COIN
+                </div>
+
+                <div class="coinButtons">
+
+                    <button
+                        id="heads"
+                        class="coinButton"
+                        type="button"
+                        onclick="chooseHeads()"
+                    >
+                        HEADS
+                    </button>
+
+
+                    <button
+                        id="tails"
+                        class="coinButton"
+                        type="button"
+                        onclick="chooseTails()"
+                    >
+                        TAILS
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             GAME OBJECTS
+        ================================================== -->
+
+        <div id="background"></div>
+
+        <div id="table"></div>
+
+        <div id="enemy"></div>
+
+        <div id="enemyText"></div>
+
+        <div id="gun"></div>
+
+        <div id="gunshotme"></div>
+
+        <div id="enemygun"></div>
+
+        <div id="enemygunshot"></div>
+
+        <div id="enemyshot"></div>
+
+        <div id="coindown"></div>
+
+        <div id="coinhead"></div>
+
+        <div id="cointails"></div>
+
+
+        <!-- =================================================
+             GUNSHOT EFFECT
+        ================================================== -->
+
+        <div id="gunshotFlash"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         WIN COUNTER
+    ====================================================== -->
+
+    <div id="winCounter">
+        Wins:
+        <span id="winStats">0</span>
+    </div>
+
+
+    <!-- =====================================================
+         LEADERBOARD
+    ====================================================== -->
+
+    <div id="leaderboard">
+
+        <div class="leaderboard-title">
+            LEADERBOARD
+        </div>
+
+        <div class="leaderboard-subtitle">
+            TOP WIN PLAYERS
+        </div>
+
+        <div id="leaderboardList">
+
+            <div class="leaderboard-loading">
+                Loading...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         GAME OVER SCREEN
+    ====================================================== -->
+
+    <div id="gameOverScreen">
+
+        <div id="gameOverContent">
+
+            <div id="gameOverTitle"></div>
+
+            <button
+                id="newChallengerButton"
+                type="button"
+            >
+                Looking for a new challenger?
+            </button>
+
+            <div id="continueText">
+                Click anywhere to continue.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUPABASE
+    ====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- =====================================================
+         GAME JAVASCRIPT
+    ====================================================== -->
+
+    <script src="./script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,2214 @@
+/* =========================================================
+GLOBAL
+========================================================= */
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: #000;
+
+    font-family:
+        Arial,
+        sans-serif;
+}
+
+
+/* =========================================================
+GAME
+========================================================= */
+
+#game {
+    position: relative;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background: #000;
+
+    z-index: 1;
+
+    will-change: transform;
+}
+
+
+/* =========================================================
+GAME HUD
+========================================================= */
+
+#gameHUD {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    z-index: 1000;
+
+    font-family:
+        Arial,
+        sans-serif;
+}
+
+
+/* =========================================================
+TURN PANEL
+========================================================= */
+
+.turnPanel {
+    position: absolute;
+
+    top: 25px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    min-width: 260px;
+
+    padding: 14px 24px;
+
+    text-align: center;
+
+    background:
+        rgba(10, 8, 6, .82);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .15);
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, .5);
+
+    backdrop-filter:
+        blur(8px);
+
+    border-radius: 4px;
+
+    z-index: 1005;
+}
+
+.turnLabel {
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    opacity: .55;
+
+    margin-bottom: 5px;
+}
+
+#turnInfo {
+    font-size: 22px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+
+    color: #e7c87a;
+
+    text-shadow:
+        0 0 10px
+        rgba(231, 200, 122, .25);
+}
+
+#actionInfo {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    opacity: .65;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+ROUND PANEL
+========================================================= */
+
+.roundPanel {
+    position: absolute;
+
+    top: 25px;
+    right: 25px;
+
+    width: 240px;
+
+    padding: 15px;
+
+    box-sizing: border-box;
+
+    background:
+        rgba(10, 8, 6, .82);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .12);
+
+    border-radius: 4px;
+
+    backdrop-filter:
+        blur(8px);
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, .45);
+
+    z-index: 1001;
+}
+
+.roundTitle {
+    text-align: center;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    opacity: .55;
+
+    margin-bottom: 2px;
+}
+
+.roundNumberValue {
+    display: block;
+
+    text-align: center;
+
+    font-size: 28px;
+
+    line-height: 1;
+
+    margin-bottom: 14px;
+
+    color: #e7c87a;
+
+    font-weight: 900;
+}
+
+
+/* =========================================================
+INFO
+========================================================= */
+
+.chamberInfo {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 6px;
+}
+
+.infoBox {
+    flex: 1;
+
+    min-width: 0;
+
+    text-align: center;
+
+    padding: 8px 4px;
+
+    background:
+        rgba(255, 255, 255, .04);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .08);
+
+    box-sizing: border-box;
+
+    border-radius: 2px;
+}
+
+.infoLabel {
+    color: snow;
+
+    display: block;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+    opacity: .45;
+
+    margin-bottom: 4px;
+}
+
+.infoBox strong {
+    display: block;
+
+    font-size: 18px;
+
+    color: #e7c87a;
+}
+
+
+/* =========================================================
+ENEMY STATUS
+========================================================= */
+
+.enemyStatus {
+    position: absolute;
+
+    top: 200px;
+    right: 25px;
+
+    width: 190px;
+
+    padding: 12px 15px;
+
+    box-sizing: border-box;
+
+    background:
+        rgba(10, 8, 6, .75);
+
+    border-left:
+        2px solid
+        #8c2525;
+
+    backdrop-filter:
+        blur(6px);
+
+    z-index: 1002;
+}
+
+.enemyStatusTitle {
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    opacity: .45;
+
+    margin-bottom: 5px;
+}
+
+#enemyAction {
+    font-size: 12px;
+
+    letter-spacing: 1px;
+
+    color: #d8d8d8;
+
+    transition:
+        opacity .2s ease;
+}
+
+
+/* =========================================================
+PLAYER ACTIONS
+========================================================= */
+
+#playerActions {
+    position: absolute;
+
+    left: 30px;
+    bottom: 30px;
+
+    width: 210px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    pointer-events: auto;
+
+    z-index: 1100;
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+}
+
+#playerActions.hidden {
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translateY(15px);
+}
+
+
+/* =========================================================
+GAME BUTTON
+========================================================= */
+
+.gameButton {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 52px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .14);
+
+    border-radius: 3px;
+
+    background:
+        rgba(12, 10, 8, .86);
+
+    color: #ddd;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    backdrop-filter:
+        blur(8px);
+
+    box-shadow:
+        0 8px 25px
+        rgba(0, 0, 0, .35);
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease,
+        opacity .2s ease;
+}
+
+.gameButton::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 3px;
+    height: 100%;
+
+    background: #777;
+
+    transition:
+        width .2s ease;
+}
+
+.gameButton:hover:not(:disabled) {
+    transform:
+        translateX(5px);
+
+    background:
+        rgba(35, 30, 25, .95);
+
+    border-color:
+        rgba(231, 200, 122, .45);
+}
+
+.gameButton:hover:not(:disabled)::before {
+    width: 6px;
+
+    background: #e7c87a;
+}
+
+.gameButton:active:not(:disabled) {
+    transform:
+        translateX(3px)
+        scale(.98);
+}
+
+
+/* =========================================================
+DANGER
+========================================================= */
+
+.gameButton.danger::before {
+    background:
+        #8c2525;
+}
+
+.gameButton.danger:hover:not(:disabled) {
+    border-color:
+        rgba(160, 50, 50, .7);
+}
+
+.gameButton.danger:hover:not(:disabled)::before {
+    background:
+        #c53535;
+}
+
+
+/* =========================================================
+SHUFFLE
+========================================================= */
+
+.shuffleButton::before {
+    background:
+        #a08b50;
+}
+
+.shuffleButton small {
+    position: absolute;
+
+    right: 15px;
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    font-size: 10px;
+
+    opacity: .5;
+}
+
+
+/* =========================================================
+DISABLED
+========================================================= */
+
+.gameButton:disabled,
+.coinButton:disabled {
+    opacity: .25;
+
+    pointer-events: none;
+
+    cursor: default;
+}
+
+
+/* =========================================================
+COIN CHOICES
+========================================================= */
+
+#coinChoices {
+    position: absolute;
+
+    left: 50%;
+    bottom: 35px;
+
+    transform:
+        translateX(-50%);
+
+    pointer-events: auto;
+
+    text-align: center;
+
+    opacity: 1;
+
+    z-index: 1100;
+
+    transition:
+        opacity .3s ease,
+        transform .3s ease;
+}
+
+#coinChoices.hidden {
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translateX(-50%)
+        translateY(15px);
+}
+
+.coinQuestion {
+    margin-bottom: 10px;
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    opacity: .5;
+}
+
+.coinButtons {
+    display: flex;
+
+    gap: 10px;
+}
+
+.coinButton {
+    width: 130px;
+
+    height: 48px;
+
+    border:
+        1px solid
+        rgba(231, 200, 122, .3);
+
+    background:
+        rgba(10, 8, 6, .88);
+
+    color:
+        #e7c87a;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    border-radius: 3px;
+
+    backdrop-filter:
+        blur(8px);
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease,
+        opacity .2s ease;
+}
+
+.coinButton:hover:not(:disabled) {
+    background:
+        rgba(231, 200, 122, .12);
+
+    border-color:
+        #e7c87a;
+
+    transform:
+        translateY(-3px);
+}
+
+.coinButton:active:not(:disabled) {
+    transform:
+        scale(.96);
+}
+
+
+/* =========================================================
+WIN COUNTER
+========================================================= */
+
+#winCounter {
+    position: fixed;
+
+    left: 10px;
+    top: 10px;
+
+    z-index: 5000;
+
+    color: white;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+GAME OBJECTS
+========================================================= */
+
+#background,
+#table,
+#enemy,
+#gun,
+#gunshotme,
+#enemygun,
+#enemygunshot,
+#coindown,
+#coinhead,
+#cointails {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-size: cover;
+
+    background-position:
+        center center;
+
+    background-repeat: no-repeat;
+
+    pointer-events: none;
+
+    will-change:
+        top,
+        opacity,
+        transform;
+}
+
+
+/* =========================================================
+BACKGROUND
+========================================================= */
+
+#background {
+    background-image:
+        url("./images/background.png");
+
+    z-index: 0;
+
+    scale: 1.1;
+}
+
+
+/* =========================================================
+ENEMY
+========================================================= */
+
+#enemy {
+    background-image:
+        url("./images/enemyshot.png");
+
+    z-index: 1;
+
+    scale: 1.1;
+
+    filter:
+        drop-shadow(
+            0 0 100px black
+        )
+        sepia(100%)
+        contrast(150%);
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+TABLE
+========================================================= */
+
+#table {
+    background-image:
+        url("./images/table.png");
+
+    z-index: 2;
+
+    scale: 1.1;
+
+    transform:
+        translateY(50px);
+
+    filter:
+        drop-shadow(
+            0 0 100px black
+        );
+}
+
+
+/* =========================================================
+COIN DOWN
+========================================================= */
+
+#coindown {
+    background-image:
+        url("./images/coindown.png");
+
+    z-index: 3;
+
+    scale: .8;
+
+    transform:
+        translateY(140px);
+
+    filter:
+        drop-shadow(
+            0 0 20px black
+        )
+        sepia(100%)
+        contrast(150%);
+
+    opacity: 1;
+
+    transition:
+        opacity .6s ease;
+}
+
+
+/* =========================================================
+COIN HEAD
+========================================================= */
+
+#coinhead {
+    background-image:
+        url("./images/coinhead.png");
+
+    z-index: 3;
+
+    scale: 1.1;
+
+    filter:
+        drop-shadow(
+            0 0 50px black
+        )
+        sepia(100%)
+        contrast(130%);
+
+    opacity: 0;
+
+    transition:
+        opacity .7s ease;
+}
+
+
+/* =========================================================
+COIN TAILS
+========================================================= */
+
+#cointails {
+    background-image:
+        url("./images/cointails.png");
+
+    z-index: 3;
+
+    scale: 1.1;
+
+    filter:
+        drop-shadow(
+            0 0 50px black
+        )
+        sepia(100%)
+        contrast(130%);
+
+    opacity: 0;
+
+    transition:
+        opacity .7s ease;
+}
+
+
+/* =========================================================
+PLAYER GUN
+========================================================= */
+
+#gun,
+#gunshotme {
+    z-index: 4;
+
+    top: 110vh;
+
+    opacity: 0;
+
+    transition:
+        top 1.15s cubic-bezier(
+            .22,
+            1,
+            .36,
+            1
+        ),
+        opacity .15s ease;
+
+    filter:
+        drop-shadow(
+            0 0 50px black
+        )
+        contrast(150%)
+        sepia(50%);
+}
+
+
+/* =========================================================
+PLAYER NORMAL GUN
+========================================================= */
+
+#gun {
+    background-image:
+        url("./images/gun.png");
+
+    scale: 1.1;
+}
+
+
+/* =========================================================
+PLAYER SELF GUN
+========================================================= */
+
+#gunshotme {
+    background-image:
+        url("./images/gunshotme.png");
+
+    scale: 1.1;
+}
+
+
+/* =========================================================
+ENEMY GUN
+========================================================= */
+
+#enemygun,
+#enemygunshot {
+    z-index: 4;
+
+    top: 110vh;
+
+    opacity: 0;
+
+    transition:
+        top 1.15s cubic-bezier(
+            .22,
+            1,
+            .36,
+            1
+        ),
+        opacity .15s ease;
+
+    filter:
+        drop-shadow(
+            0 0 100px black
+        )
+        sepia(100%)
+        contrast(130%);
+}
+
+
+/* =========================================================
+ENEMY NORMAL GUN
+========================================================= */
+
+#enemygun {
+    background-image:
+        url("./images/enemygun.png");
+
+    z-index: 1;
+
+    scale: 1;
+}
+
+
+/* =========================================================
+ENEMY SELF GUN
+========================================================= */
+
+#enemygunshot {
+    background-image:
+        url("./images/enemygunshot.png");
+
+    z-index: 1;
+
+    scale: 1.1;
+
+    transform:
+        translateX(20px);
+}
+
+
+/* =========================================================
+GUN STATES
+========================================================= */
+
+#gun.gun-hidden,
+#gunshotme.gun-hidden,
+#enemygun.gun-hidden,
+#enemygunshot.gun-hidden {
+    top: 110vh;
+
+    opacity: 0;
+}
+
+#gun.gun-visible,
+#gunshotme.gun-visible,
+#enemygun.gun-visible,
+#enemygunshot.gun-visible {
+    top: 0;
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+PLAYER GUN IDLE
+========================================================= */
+
+#gun.gun-idle,
+#gunshotme.gun-idle {
+    animation:
+        gunIdle
+        .3s
+        linear
+        infinite;
+}
+
+@keyframes gunIdle {
+
+    0% {
+        margin-left: 0;
+        rotate: 0deg;
+    }
+
+    50% {
+        margin-left: 2px;
+        rotate: -1deg;
+    }
+
+    100% {
+        margin-left: 0;
+        rotate: 0deg;
+    }
+}
+
+
+/* =========================================================
+ENEMY DEATH
+========================================================= */
+
+.enemy-death {
+    animation:
+        enemyDeath
+        .8s
+        ease
+        forwards;
+}
+
+@keyframes enemyDeath {
+
+    0% {
+        transform:
+            translateY(0)
+            rotate(0deg)
+            scale(1);
+
+        opacity: 1;
+    }
+
+    30% {
+        transform:
+            translateY(-10px)
+            rotate(-2deg)
+            scale(1.01);
+
+        opacity: 1;
+    }
+
+    100% {
+        transform:
+            translateY(100px)
+            rotate(5deg)
+            scale(.96);
+
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+ENEMY TEXT
+========================================================= */
+
+#enemyText {
+    position: absolute;
+
+    left: 68%;
+    top: 36%;
+
+    transform:
+        translateY(10px)
+        scale(.98);
+
+    max-width: 240px;
+
+    padding:
+        10px 14px;
+
+    box-sizing: border-box;
+
+    color: white;
+
+    background:
+        rgba(10, 8, 6, .82);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .15);
+
+    border-left:
+        3px solid
+        #8c2525;
+
+    border-radius: 5px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, .4);
+
+    backdrop-filter:
+        blur(8px);
+
+    font-size: 12px;
+
+    line-height: 1.4;
+
+    letter-spacing: .5px;
+
+    text-align: left;
+
+    opacity: 0;
+
+    transition:
+        opacity .3s ease,
+        transform .3s ease;
+
+    pointer-events: none;
+
+    z-index: 20;
+}
+
+#enemyText::before {
+    content: "";
+
+    position: absolute;
+
+    left: -8px;
+    top: 18px;
+
+    width: 14px;
+    height: 14px;
+
+    background:
+        rgba(10, 8, 6, .82);
+
+    border-left:
+        1px solid
+        rgba(255, 255, 255, .15);
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, .15);
+
+    transform:
+        rotate(45deg);
+}
+
+
+/* =========================================================
+GUNSHOT FLASH
+========================================================= */
+
+#gunshotFlash {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    pointer-events: none;
+
+    z-index: 99999;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(72, 0, 0, .95) 0%,
+            rgba(247, 4, 4, .5) 20%,
+            rgba(120, 0, 0, .35) 55%,
+            rgba(0, 0, 0, 0) 100%
+        );
+
+    opacity: 0;
+}
+
+
+/* =========================================================
+FLASH
+========================================================= */
+
+.gunshot-flash {
+    animation:
+        gunshotFlash
+        .32s
+        ease-out;
+}
+
+@keyframes gunshotFlash {
+
+    0% {
+        opacity: 1;
+    }
+
+    20% {
+        opacity: .9;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+SCREEN SHAKE
+========================================================= */
+
+.gunshot-shake {
+    animation:
+        gunshotShake
+        .45s
+        cubic-bezier(
+            .36,
+            .07,
+            .19,
+            .97
+        );
+}
+
+@keyframes gunshotShake {
+
+    0% {
+        transform:
+            translate3d(
+                0,
+                0,
+                0
+            );
+    }
+
+    10% {
+        transform:
+            translate3d(
+                -12px,
+                7px,
+                0
+            )
+            rotate(-.5deg);
+    }
+
+    20% {
+        transform:
+            translate3d(
+                10px,
+                -8px,
+                0
+            )
+            rotate(.6deg);
+    }
+
+    30% {
+        transform:
+            translate3d(
+                -8px,
+                -5px,
+                0
+            )
+            rotate(-.4deg);
+    }
+
+    40% {
+        transform:
+            translate3d(
+                8px,
+                6px,
+                0
+            )
+            rotate(.4deg);
+    }
+
+    50% {
+        transform:
+            translate3d(
+                -5px,
+                3px,
+                0
+            );
+    }
+
+    70% {
+        transform:
+            translate3d(
+                3px,
+                -2px,
+                0
+            );
+    }
+
+    100% {
+        transform:
+            translate3d(
+                0,
+                0,
+                0
+            );
+    }
+}
+
+
+/* =========================================================
+GAME OVER
+========================================================= */
+
+#gameOverScreen {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 999999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(0, 0, 0, 0);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 1.5s ease,
+        background 1.5s ease;
+}
+
+#gameOverContent {
+    width:
+        min(
+            700px,
+            90vw
+        );
+
+    text-align: center;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 30px;
+
+    transform:
+        translateY(20px)
+        scale(.95);
+
+    opacity: 0;
+
+    transition:
+        opacity 1.2s ease,
+        transform 1.2s ease;
+}
+
+#gameOverTitle {
+    font-size:
+        clamp(
+            24px,
+            4vw,
+            48px
+        );
+
+    color: white;
+
+    text-shadow:
+        0 0 15px
+        rgba(255, 255, 255, .25);
+
+    line-height: 1.3;
+}
+
+#newChallengerButton {
+    padding:
+        16px 30px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, .25);
+
+    border-radius: 8px;
+
+    background:
+        rgba(255, 255, 255, .08);
+
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    backdrop-filter:
+        blur(10px);
+
+    transition:
+        transform .25s ease,
+        background .25s ease,
+        border-color .25s ease;
+}
+
+#newChallengerButton:hover {
+    transform:
+        scale(1.05);
+
+    background:
+        rgba(255, 255, 255, .16);
+
+    border-color:
+        rgba(255, 255, 255, .5);
+}
+
+#continueText {
+    display: none;
+
+    color:
+        rgba(255, 255, 255, .65);
+
+    font-size: 14px;
+
+    letter-spacing: 1px;
+
+    animation:
+        continueBlink
+        2s
+        infinite;
+}
+
+@keyframes continueBlink {
+
+    0%,
+    100% {
+        opacity: .35;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+#leaderboard {
+    position: fixed;
+
+    left: 30px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 230px;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    background: rgba(10, 10, 10, .75);
+
+    border: 1px solid rgba(255, 255, 255, .12);
+
+    border-radius: 14px;
+
+    backdrop-filter: blur(10px);
+
+    color: white;
+
+    z-index: 100;
+}
+
+
+.leaderboard-title {
+    font-size: 20px;
+
+    font-weight: bold;
+
+    letter-spacing: 3px;
+
+    text-align: center;
+}
+
+
+.leaderboard-subtitle {
+    margin-top: 5px;
+
+    margin-bottom: 15px;
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    text-align: center;
+
+    opacity: .5;
+}
+
+
+#leaderboardList {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.leaderboard-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, .05);
+
+    transition: .2s;
+}
+
+
+.leaderboard-item:hover {
+    background: rgba(255, 255, 255, .1);
+
+    transform: translateX(3px);
+}
+
+/* =========================================================
+   WELCOME SCREEN
+========================================================= */
+
+#welcomeScreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(60, 60, 60, .25),
+            rgba(0, 0, 0, .98) 70%
+        );
+
+    color: white;
+
+    transition:
+        opacity .8s ease,
+        visibility .8s ease;
+}
+
+
+/* =========================================================
+   HIDDEN
+========================================================= */
+
+#welcomeScreen.hidden {
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.welcomeOverlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0,0,0,.9),
+            transparent 45%,
+            rgba(0,0,0,.9)
+        );
+
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.welcomeContent {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: min(520px, 90vw);
+
+    text-align: center;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    animation:
+        welcomeAppear
+        1s
+        cubic-bezier(.2,.8,.2,1);
+}
+
+
+/* =========================================================
+   SMALL TITLE
+========================================================= */
+
+.welcomeSmallTitle {
+
+    font-size: 11px;
+
+    letter-spacing: 6px;
+
+    opacity: .55;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.welcomeTitle {
+
+    margin: 0;
+
+    font-size: clamp(48px, 8vw, 86px);
+
+    line-height: .85;
+
+    font-weight: 800;
+
+    letter-spacing: -3px;
+
+    text-shadow:
+        0 10px 40px rgba(0,0,0,.8);
+}
+
+
+.welcomeTitle span {
+
+    font-size: .82em;
+
+    opacity: .65;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.welcomeDescription {
+
+    margin-top: 25px;
+
+    margin-bottom: 25px;
+
+    max-width: 420px;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    opacity: .55;
+}
+
+
+/* =========================================================
+   EXPERIENCE INFO
+========================================================= */
+
+.experienceInfo {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px 18px;
+
+    margin-bottom: 32px;
+
+    text-align: left;
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    background:
+        rgba(255,255,255,.035);
+
+    backdrop-filter: blur(10px);
+
+    border-radius: 10px;
+}
+
+
+.experienceIcon {
+
+    width: 34px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.08);
+
+    font-size: 14px;
+}
+
+
+.experienceInfo strong {
+
+    display: block;
+
+    font-size: 12px;
+
+    letter-spacing: .5px;
+}
+
+
+.experienceInfo span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    opacity: .45;
+}
+
+
+/* =========================================================
+   USERNAME
+========================================================= */
+
+.usernameSection {
+
+    width: 100%;
+
+    text-align: left;
+
+    margin-bottom: 18px;
+}
+
+
+.usernameSection label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    opacity: .45;
+}
+
+
+.usernameInputWrapper {
+
+    position: relative;
+
+    width: 100%;
+}
+
+
+.usernamePrefix {
+
+    position: absolute;
+
+    left: 18px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 17px;
+
+    opacity: .35;
+
+    pointer-events: none;
+}
+
+
+#welcomeUsernameInput {
+
+    width: 100%;
+
+    height: 58px;
+
+    box-sizing: border-box;
+
+    padding:
+        0 18px
+        0 43px;
+
+    border: 1px solid rgba(255,255,255,.12);
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background:
+        rgba(255,255,255,.045);
+
+    color: white;
+
+    font-size: 15px;
+
+    transition:
+        border .25s ease,
+        background .25s ease,
+        box-shadow .25s ease;
+}
+
+
+#welcomeUsername::placeholder {
+
+    color: white;
+
+    opacity: .25;
+}
+
+
+#welcomeUsername:focus {
+
+    border-color:
+        rgba(255,255,255,.35);
+
+    background:
+        rgba(255,255,255,.07);
+
+    box-shadow:
+        0 0 0 4px rgba(255,255,255,.025);
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.welcomeError {
+
+    min-height: 15px;
+
+    margin: 7px 0 0;
+
+    color: #d87878;
+
+    font-size: 11px;
+
+    opacity: 0;
+}
+
+
+.welcomeError.show {
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+   PLAY BUTTON
+========================================================= */
+
+.playButton {
+
+    width: 100%;
+
+    height: 62px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    background: white;
+
+    color: black;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    letter-spacing: 4px;
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+
+.playButton:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 15px 40px
+        rgba(255,255,255,.12);
+}
+
+
+.playButton:active {
+
+    transform:
+        translateY(0)
+        scale(.98);
+}
+
+
+.playArrow {
+
+    font-size: 20px;
+
+    transition:
+        transform .25s ease;
+}
+
+
+.playButton:hover .playArrow {
+
+    transform:
+        translateX(7px);
+}
+
+
+/* =========================================================
+   CHANGE USERNAME
+========================================================= */
+
+.changeUsernameButton {
+
+    margin-top: 16px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: white;
+
+    opacity: .3;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition:
+        opacity .2s ease;
+}
+
+
+.changeUsernameButton:hover {
+
+    opacity: .7;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.welcomeFooter {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 35px;
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    opacity: .2;
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes welcomeAppear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(30px)
+            scale(.97);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .welcomeContent {
+
+        width: 86vw;
+
+    }
+
+    .welcomeTitle {
+
+        font-size: 52px;
+
+    }
+
+    .welcomeDescription {
+
+        font-size: 12px;
+
+    }
+
+    .experienceInfo {
+
+        padding: 12px;
+
+    }
+
+}
+
+
+.leaderboard-rank {
+    width: 25px;
+
+    font-weight: bold;
+
+    opacity: .7;
+}
+
+
+.leaderboard-name {
+    flex: 1;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.leaderboard-score {
+    font-weight: bold;
+}
+
+
+.leaderboard-loading {
+    text-align: center;
+
+    font-size: 12px;
+
+    opacity: .5;
+}
+
+@media (max-width: 900px) {
+
+    #leaderboard {
+        scale: 0.8;
+        position: absolute;
+
+        left: 10px;
+        top: 50%;
+
+        transform: none;
+
+        width: 180px;
+
+        padding: 12px;
+    }
+
+    .leaderboard-title {
+        font-size: 14px;
+    }
+
+    .leaderboard-item {
+        padding: 7px;
+
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .turnPanel {
+        top: 12px;
+
+        min-width: 190px;
+
+        padding:
+            10px 15px;
+    }
+
+    #turnInfo {
+        font-size: 16px;
+    }
+
+    .roundPanel {
+        top: 150px;
+
+        right: 12px;
+
+        width: 160px;
+
+        padding: 10px;
+    }
+
+    .roundNumberValue {
+        font-size: 24px;
+
+        margin-bottom: 10px;
+    }
+
+    .infoLabel {
+        font-size: 7px;
+    }
+
+    .infoBox strong {
+        font-size: 15px;
+    }
+
+    .enemyStatus {
+        top: 300px;
+
+        right: 12px;
+
+        width: 150px;
+
+        padding: 10px;
+    }
+
+    #playerActions {
+        left: 12px;
+
+        bottom: 12px;
+
+        width: 165px;
+    }
+
+    .gameButton {
+        min-height: 45px;
+
+        font-size: 9px;
+    }
+
+    #coinChoices {
+        bottom: 15px;
+    }
+
+    .coinButton {
+        width: 100px;
+
+        height: 42px;
+    }
+
+    #winCounter {
+        font-size: 11px;
+    }
+
+    #enemyText {
+        left: auto;
+
+        right: 50px;
+
+        top: 50%;
+
+        max-width: 170px;
+
+        padding:
+            8px 10px;
+
+        font-size: 10px;
+    }
+
+    #gun,
+    #gunshotme {
+        transform: translateX(-100px) scale(1.3);
+        background-size: auto 50%;
+
+        background-repeat: no-repeat;
+
+        background-position:
+            100% 100%;
+    }
+
+}
