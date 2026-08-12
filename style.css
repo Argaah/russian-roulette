@@ -2115,7 +2115,7 @@ GAME OVER
 MOBILE
 ========================================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 600px) {
 
     .turnPanel {
         top: 12px;
