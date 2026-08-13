@@ -3,115 +3,174 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Russian Roulette</title>
 
-    <link rel="stylesheet" href="./style.css">
+    <link
+        rel="stylesheet"
+        href="./style.css"
+    >
 </head>
+
 
 <body>
 
+
     <!-- =====================================================
-         GAME
+         WELCOME SCREEN
     ====================================================== -->
-<!-- =========================================================
-     WELCOME SCREEN
-========================================================= -->
 
-<div id="welcomeScreen">
+    <div id="welcomeScreen">
 
-    <div class="welcomeOverlay"></div>
+        <div class="welcomeOverlay"></div>
 
-    <div class="welcomeContent">
+        <div class="welcomeContent">
 
-        <div class="welcomeSmallTitle">
-            WELCOME TO
-        </div>
-
-        <h1 class="welcomeTitle">
-            RUSSIAN<br>
-            <span>ROULETTE</span>
-        </h1>
-
-        <p class="welcomeDescription">
-            A game of luck, courage and one final decision.
-        </p>
-
-        <div class="experienceInfo">
-
-            <div class="experienceIcon">
-                ◈
+            <div class="welcomeSmallTitle">
+                WELCOME TO
             </div>
 
-            <div>
-                <strong>
-                    Use a desktop browser
-                </strong>
+
+            <h1 class="welcomeTitle">
+                RUSSIAN<br>
+                <span>ROULETTE</span>
+            </h1>
+
+
+            <p class="welcomeDescription">
+                A game of luck, courage and one final decision.
+            </p>
+
+
+            <div class="experienceInfo">
+
+                <div class="experienceIcon">
+                    ◈
+                </div>
+
+                <div>
+
+                    <strong>
+                        Use a desktop browser
+                    </strong>
+
+                    <span>
+                        and a headset for a better experience.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 USERNAME
+            ================================================== -->
+
+            <div class="usernameSection">
+
+                <label for="welcomeUsernameInput">
+                    ENTER YOUR NAME
+                </label>
+
+
+                <div class="usernameInputWrapper">
+
+                    <span class="usernamePrefix">
+                        @
+                    </span>
+
+
+                    <input
+                        id="welcomeUsernameInput"
+                        type="text"
+                        maxlength="20"
+                        placeholder="Your username..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <p
+                    id="welcomeError"
+                    class="welcomeError"
+                ></p>
+
+            </div>
+
+
+            <!-- =================================================
+                 PLAY
+            ================================================== -->
+
+            <button
+                id="welcomePlayButton"
+                class="playButton"
+                type="button"
+            >
 
                 <span>
-                    and a headset for a better experience.
-                </span>
-            </div>
-
-        </div>
-
-        <div class="usernameSection">
-
-            <label for="welcomeUsername">
-                ENTER YOUR NAME
-            </label>
-
-            <div class="usernameInputWrapper">
-
-                <span class="usernamePrefix">
-                    @
+                    PLAY
                 </span>
 
-                <input
-                    id="welcomeUsernameInput"
-                    type="text"
-                    maxlength="20"
-                    placeholder="Your username..."
-                    autocomplete="off"
-                >
+                <span class="playArrow">
+                    →
+                </span>
+
+            </button>
+
+
+            <!-- =================================================
+                 CHANGE USERNAME
+            ================================================== -->
+
+            <button
+                id="changeUsernameButton"
+                class="changeUsernameButton"
+                type="button"
+            >
+                Change username
+            </button>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
+
+            <div class="welcomeFooter">
+
+                <span>
+                    GOOD LUCK
+                </span>
+
+                <span>
+                    •
+                </span>
+
+                <span>
+                    YOU WILL NEED IT
+                </span>
 
             </div>
 
-            <p
-                id="welcomeError"
-                class="welcomeError"
-            ></p>
-
-        </div>
-
-        <button
-            id="welcomePlayButton"
-            class="playButton"
-            type="button"
-        >
-            <span>PLAY</span>
-            <span class="playArrow">→</span>
-        </button>
-
-        <button
-            id="changeUsernameButton"
-            class="changeUsernameButton"
-            type="button"
-        >
-            Change username
-        </button>
-
-        <div class="welcomeFooter">
-            <span>GOOD LUCK</span>
-            <span>•</span>
-            <span>YOU WILL NEED IT</span>
         </div>
 
     </div>
 
-</div>
+
+
+    <!-- =====================================================
+         GAME
+    ====================================================== -->
+
     <div id="game">
+
 
         <!-- =================================================
              GAME HUD
@@ -119,24 +178,34 @@
 
         <div id="gameHUD">
 
-            <!-- TURN PANEL -->
+
+            <!-- =================================================
+                 TURN PANEL
+            ================================================== -->
 
             <div class="turnPanel">
+
                 <div class="turnLabel">
                     CURRENT TURN
                 </div>
+
 
                 <div id="turnInfo">
                     WAITING...
                 </div>
 
+
                 <div id="actionInfo">
                     Waiting for the coin...
                 </div>
+
             </div>
 
 
-            <!-- ROUND / AMMO PANEL -->
+
+            <!-- =================================================
+                 ROUND / AMMO PANEL
+            ================================================== -->
 
             <div class="roundPanel">
 
@@ -144,16 +213,22 @@
                     ROUND
                 </div>
 
+
                 <div
                     class="roundNumberValue"
                     id="roundNumber"
                 >
-                    Round
+                    1
                 </div>
+
 
                 <div class="chamberInfo">
 
+
+                    <!-- CHAMBERS -->
+
                     <div class="infoBox">
+
                         <span class="infoLabel">
                             CHAMBERS
                         </span>
@@ -161,10 +236,14 @@
                         <strong id="chambersLeft">
                             6
                         </strong>
+
                     </div>
 
 
+                    <!-- BULLETS -->
+
                     <div class="infoBox">
+
                         <span class="infoLabel">
                             BULLETS
                         </span>
@@ -172,10 +251,14 @@
                         <strong id="bulletsLeft">
                             -
                         </strong>
+
                     </div>
 
 
+                    <!-- BLANKS -->
+
                     <div class="infoBox">
+
                         <span class="infoLabel">
                             BLANKS
                         </span>
@@ -183,20 +266,26 @@
                         <strong id="blanksLeft">
                             -
                         </strong>
+
                     </div>
+
 
                 </div>
 
             </div>
 
 
-            <!-- ENEMY STATUS -->
+
+            <!-- =================================================
+                 ENEMY STATUS
+            ================================================== -->
 
             <div class="enemyStatus">
 
                 <div class="enemyStatusTitle">
                     ENEMY
                 </div>
+
 
                 <div id="enemyAction">
                     Waiting...
@@ -205,88 +294,121 @@
             </div>
 
 
-            <!-- PLAYER ACTIONS -->
+
+            <!-- =================================================
+                 PLAYER ACTIONS
+            ================================================== -->
 
             <div id="playerActions">
+
+
+                <!-- SHOOT ENEMY -->
 
                 <button
                     id="shotenemy"
                     class="gameButton danger"
                     type="button"
-                    onclick="playerShootEnemy()"
                 >
+
                     <span>
                         SHOOT ENEMY
                     </span>
+
                 </button>
 
+
+
+                <!-- SHOOT SELF -->
 
                 <button
                     id="shotme"
                     class="gameButton"
                     type="button"
-                    onclick="playerShootSelf()"
                 >
+
                     <span>
                         SHOOT YOURSELF
                     </span>
+
                 </button>
 
+
+
+                <!-- SHUFFLE -->
 
                 <button
                     id="playershuffle"
                     class="gameButton shuffleButton"
                     type="button"
-                    onclick="playerShuffle()"
                 >
+
                     <span>
                         SHUFFLE
                     </span>
 
+
                     <small>
+
                         <span id="shuffleCount">
                             0
-                        </span>/2
+                        </span>
+
+                        /2
+
                     </small>
+
                 </button>
+
 
             </div>
 
 
-            <!-- COIN CHOICES -->
+
+            <!-- =================================================
+                 COIN CHOICES
+            ================================================== -->
 
             <div id="coinChoices">
+
 
                 <div class="coinQuestion">
                     GUESS THE COIN
                 </div>
 
+
                 <div class="coinButtons">
+
+
+                    <!-- HEADS -->
 
                     <button
                         id="heads"
                         class="coinButton"
                         type="button"
-                        onclick="chooseHeads()"
                     >
                         HEADS
                     </button>
 
 
+
+                    <!-- TAILS -->
+
                     <button
                         id="tails"
                         class="coinButton"
                         type="button"
-                        onclick="chooseTails()"
                     >
                         TAILS
                     </button>
+
 
                 </div>
 
             </div>
 
+
         </div>
+
 
 
         <!-- =================================================
@@ -301,15 +423,30 @@
 
         <div id="enemyText"></div>
 
+
+        <!-- =================================================
+             PLAYER GUNS
+        ================================================== -->
+
         <div id="gun"></div>
 
         <div id="gunshotme"></div>
+
+
+        <!-- =================================================
+             ENEMY GUNS
+        ================================================== -->
 
         <div id="enemygun"></div>
 
         <div id="enemygunshot"></div>
 
         <div id="enemyshot"></div>
+
+
+        <!-- =================================================
+             COINS
+        ================================================== -->
 
         <div id="coindown"></div>
 
@@ -318,13 +455,16 @@
         <div id="cointails"></div>
 
 
+
         <!-- =================================================
-             GUNSHOT EFFECT
+             GUNSHOT FLASH
         ================================================== -->
 
         <div id="gunshotFlash"></div>
 
+
     </div>
+
 
 
     <!-- =====================================================
@@ -332,9 +472,15 @@
     ====================================================== -->
 
     <div id="winCounter">
+
         Wins:
-        <span id="winStats">0</span>
+
+        <span id="winStats">
+            0
+        </span>
+
     </div>
+
 
 
     <!-- =====================================================
@@ -343,13 +489,16 @@
 
     <div id="leaderboard">
 
+
         <div class="leaderboard-title">
             LEADERBOARD
         </div>
 
+
         <div class="leaderboard-subtitle">
             TOP WIN PLAYERS
         </div>
+
 
         <div id="leaderboardList">
 
@@ -359,7 +508,9 @@
 
         </div>
 
+
     </div>
+
 
 
     <!-- =====================================================
@@ -368,9 +519,17 @@
 
     <div id="gameOverScreen">
 
+
         <div id="gameOverContent">
 
+
+            <!-- GAME OVER TITLE -->
+
             <div id="gameOverTitle"></div>
+
+
+
+            <!-- NEW CHALLENGER -->
 
             <button
                 id="newChallengerButton"
@@ -379,26 +538,40 @@
                 Looking for a new challenger?
             </button>
 
+
+
+            <!-- CONTINUE -->
+
             <div id="continueText">
                 Click anywhere to continue.
             </div>
 
+
         </div>
 
+
     </div>
+
 
 
     <!-- =====================================================
          SUPABASE
     ====================================================== -->
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+
 
     <!-- =====================================================
          GAME JAVASCRIPT
     ====================================================== -->
 
-    <script  src="./script.js"></script>
+    <script
+        src="./script.js"
+    ></script>
+
 
 </body>
 
