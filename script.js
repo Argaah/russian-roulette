@@ -3603,7 +3603,6 @@ function gunshotEffect() {
     )
 }
 
-
 // =========================================================
 // PLAYER WON
 // =========================================================
@@ -3614,9 +3613,11 @@ async function playerWonGame() {
         return
 
 
-    gameOver = true
+    gameOver =
+        true
 
-    actionLocked = true
+    actionLocked =
+        true
 
 
     stopGameSounds()
@@ -3624,18 +3625,34 @@ async function playerWonGame() {
 
 
     // =====================================================
-    // SIMPAN WIN KE SUPABASE
+    // SAVE WIN
     // =====================================================
 
-    await addPlayerWin()
+    const winSaved =
+        await addPlayerWin()
 
 
     // =====================================================
-    // AMBIL TOTAL WIN TERBARU
+    // GET LATEST WIN
     // =====================================================
 
     const currentWins =
         await getPlayerWins()
+
+
+    console.log(
+        'PLAYER WON'
+    )
+
+    console.log(
+        'WIN SAVED:',
+        winSaved
+    )
+
+    console.log(
+        'CURRENT WINS:',
+        currentWins
+    )
 
 
     // =====================================================
@@ -3734,8 +3751,6 @@ async function playerWonGame() {
         800
     )
 }
-
-
 // =========================================================
 // GET PLAYER WINS
 // =========================================================
@@ -3746,7 +3761,13 @@ async function getPlayerWins() {
         return 0
 
 
-    if (!playerUsername)
+    const username =
+        String(
+            playerUsername || ''
+        ).trim()
+
+
+    if (!username)
         return 0
 
 
@@ -3759,7 +3780,7 @@ async function getPlayerWins() {
             .select('wins')
             .eq(
                 'username',
-                playerUsername
+                username
             )
             .maybeSingle()
 
@@ -3767,10 +3788,9 @@ async function getPlayerWins() {
     if (error) {
 
         console.error(
-            'Get player wins error:',
+            'GET PLAYER WINS ERROR:',
             error
         )
-
 
         return 0
     }
@@ -3780,9 +3800,11 @@ async function getPlayerWins() {
         return 0
 
 
-    return Number(
-        data.wins
-    ) || 0
+    return (
+        Number(
+            data.wins
+        ) || 0
+    )
 }
 
 
@@ -4773,13 +4795,19 @@ function renderLeaderboard(data) {
 
 
 // =========================================================
-// ADD PLAYER WIN
+// ADD PLAYER WIN - SECURE RPC
 // =========================================================
 
 async function addPlayerWin() {
 
-    if (!supabaseClient)
+    if (!supabaseClient) {
+
+        console.error(
+            'Supabase client is not available.'
+        )
+
         return false
+    }
 
 
     const username =
@@ -4788,119 +4816,65 @@ async function addPlayerWin() {
         ).trim()
 
 
-    if (!username)
-        return false
-
-
-    const {
-        data: existingPlayer,
-        error: findError
-    } =
-        await supabaseClient
-            .from('leaderboard')
-            .select(
-                'id, username, wins'
-            )
-            .eq(
-                'username',
-                username
-            )
-            .maybeSingle()
-
-
-    if (findError) {
+    if (!username) {
 
         console.error(
-            'Find player error:',
-            findError
+            'Cannot add win: username is empty.'
+        )
+
+        return false
+    }
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.rpc(
+                'add_player_win',
+                {
+                    player_name:
+                        username
+                }
+            )
+
+
+        if (error) {
+
+            console.error(
+                'ADD WIN RPC ERROR:',
+                error
+            )
+
+            return false
+        }
+
+
+        console.log(
+            'WIN SAVED:',
+            username,
+            'TOTAL WINS:',
+            data
         )
 
 
+        await loadLeaderboard()
+
+
+        return true
+
+    } catch (error) {
+
+        console.error(
+            'ADD WIN EXCEPTION:',
+            error
+        )
+
         return false
     }
-
-
-    // =====================================================
-    // PLAYER BARU
-    // =====================================================
-
-    if (!existingPlayer) {
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from('leaderboard')
-                .insert({
-                    username:
-                        username,
-
-                    wins:
-                        1
-                })
-
-
-        if (error) {
-
-            console.error(
-                'Insert player error:',
-                error
-            )
-
-
-            return false
-        }
-
-
-    } else {
-
-        // =================================================
-        // PLAYER SUDAH ADA
-        // =================================================
-
-        const newWins =
-            (
-                Number(
-                    existingPlayer.wins
-                ) || 0
-            ) + 1
-
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from('leaderboard')
-                .update({
-                    wins:
-                        newWins
-                })
-                .eq(
-                    'id',
-                    existingPlayer.id
-                )
-
-
-        if (error) {
-
-            console.error(
-                'Update player error:',
-                error
-            )
-
-
-            return false
-        }
-    }
-
-
-    await loadLeaderboard()
-
-
-    return true
 }
-
-
 // =========================================================
 // TEST SUPABASE
 // =========================================================
