@@ -4,6 +4,8 @@
 // PART 1 / 2
 // =========================================================
 
+let gameSessionId = null
+
 // =========================================================
 // SUPABASE
 // =========================================================
@@ -4792,17 +4794,7 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
-    if (!supabaseClient)
-        return false
-
-
-    const username =
-        String(
-            playerUsername ?? ''
-        ).trim()
-
-
-    if (!username)
+    if (!gameSessionId)
         return false
 
 
@@ -4816,8 +4808,8 @@ async function addPlayerWin() {
                 'add-player-win',
                 {
                     body: {
-                        player_name:
-                            username
+                        session_id:
+                            gameSessionId
                     }
                 }
             )
@@ -4826,7 +4818,7 @@ async function addPlayerWin() {
         if (error) {
 
             console.error(
-                'Add player win error:',
+                'Win error:',
                 error
             )
 
@@ -4834,31 +4826,15 @@ async function addPlayerWin() {
         }
 
 
-        if (!data) {
+        if (!data?.success) {
 
             console.error(
-                'No response from server.'
+                'Win rejected:',
+                data?.error
             )
 
             return false
         }
-
-
-        if (!data.success) {
-
-            console.error(
-                'Server rejected win:',
-                data.error
-            )
-
-            return false
-        }
-
-
-        console.log(
-            'WIN SAVED:',
-            data.wins
-        )
 
 
         return true
@@ -4866,10 +4842,8 @@ async function addPlayerWin() {
     } catch (error) {
 
         console.error(
-            'Add player win exception:',
             error
         )
-
 
         return false
     }
