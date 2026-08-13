@@ -1,4 +1,7 @@
-// =========================================================
+(function() {
+    'use strict'
+
+    // =========================================================
 // RUSSIAN ROULETTE
 // SECURE CLEAN VERSION (FIXED)
 // =========================================================
@@ -2201,60 +2204,27 @@ function renderLeaderboard(data) {
 //
 // =========================================================
 
+// Ganti fungsi addPlayerWin() lama di script.js (baris 4779) dengan kode ini:
+
 async function addPlayerWin() {
+    if (!supabaseClient) return false;
 
-    if (!supabaseClient) {
-        console.error('Supabase client tidak tersedia.')
-        return false
+    const username = String(playerUsername || '').trim();
+    if (!username) return false;
+
+    // Panggil fungsi submit_win di Supabase (Server otomatis tambah +1 win)
+    const { error } = await supabaseClient.rpc('submit_win', {
+        p_username: username
+    });
+
+    if (error) {
+        console.error('Error submit win:', error);
+        return false;
     }
 
-    if (!window.gameSessionId) {
-        console.error('GAME SESSION TIDAK ADA')
-        return false
-    }
-
-    try {
-        const { data, error } = await supabaseClient.functions.invoke(
-            'add-player-win',
-            {
-                body: {
-                    player_name: playerUsername,
-                    game_session_id: window.gameSessionId
-                }
-            }
-        )
-
-
-        if (error) {
-            console.error('ADD-PLAYER-WIN ERROR:', error)
-
-            if (error.context) {
-                try {
-                    console.error(
-                        'ERROR BODY:',
-                        await error.context.text()
-                    )
-                } catch (e) {
-                    console.error('Tidak bisa membaca error body:', e)
-                }
-            }
-
-            return false
-        }
-
-        if (!data || data.success !== true) {
-            console.error('WIN DITOLAK:', data)
-            return false
-        }
-
-
-        await loadLeaderboard()
-
-        return true
-    } catch (error) {
-        console.error('ADD PLAYER WIN EXCEPTION:', error)
-        return false
-    }
+    // Refresh tampilan leaderboard
+    await loadLeaderboard();
+    return true;
 }
 
 
@@ -2503,3 +2473,5 @@ testSupabase()
 // =========================================================
 // DEBUG SESSION
 // =========================================================
+
+})()
