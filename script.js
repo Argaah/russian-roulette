@@ -2213,46 +2213,30 @@ function renderLeaderboard(data) {
 // =========================================================
 
 async function addPlayerWin() {
-    console.log('========== ADD PLAYER WIN ==========')
-    console.log('GAME SESSION:', window.gameSessionId)
-
     if (!supabaseClient) {
         console.error('Supabase client tidak tersedia.')
         return false
     }
 
-    if (!window.gameSessionId) {
+    if (!gameSessionId) {
         console.error('GAME SESSION TIDAK ADA')
         return false
     }
 
     try {
-        const { data, error } = await supabaseClient.functions.invoke(
-            'add-player-win',
-            {
-                body: {
-                    player_name: playerUsername,
-                    game_session_id: window.gameSessionId
+        const { data, error } =
+            await supabaseClient.functions.invoke(
+                'add-player-win',
+                {
+                    body: {
+                        player_name: playerUsername,
+                        game_session_id: gameSessionId
+                    }
                 }
-            }
-        )
-
-        console.log('ADD-PLAYER-WIN RESPONSE:', data)
+            )
 
         if (error) {
             console.error('ADD-PLAYER-WIN ERROR:', error)
-
-            if (error.context) {
-                try {
-                    console.error(
-                        'ERROR BODY:',
-                        await error.context.text()
-                    )
-                } catch (e) {
-                    console.error('Tidak bisa membaca error body:', e)
-                }
-            }
-
             return false
         }
 
@@ -2261,18 +2245,15 @@ async function addPlayerWin() {
             return false
         }
 
-        console.log('✅ WIN BERHASIL DITAMBAHKAN')
-
         await loadLeaderboard()
 
         return true
+
     } catch (error) {
         console.error('ADD PLAYER WIN EXCEPTION:', error)
         return false
     }
 }
-
-
 // =========================================================
 // TEST SUPABASE
 // =========================================================
@@ -2469,15 +2450,6 @@ window.addEventListener(
 // =========================================================
 // GLOBAL FUNCTIONS
 // =========================================================
-//
-// Diperlukan karena HTML memakai:
-// onclick="playerShootEnemy()"
-// onclick="playerShootSelf()"
-// onclick="playerShuffle()"
-// onclick="chooseHeads()"
-// onclick="chooseTails()"
-//
-// =========================================================
 
 window.playerShootEnemy = playerShootEnemy
 window.playerShootSelf = playerShootSelf
@@ -2487,8 +2459,8 @@ window.chooseTails = chooseTails
 window.playFromWelcome = playFromWelcome
 window.restartGame = restartGame
 window.changePlayerUsername = changePlayerUsername
-window.addPlayerWin = addPlayerWin
 
+// JANGAN expose addPlayerWin ke window
 
 // =========================================================
 // INITIALIZE
