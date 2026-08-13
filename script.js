@@ -4795,7 +4795,7 @@ function renderLeaderboard(data) {
 
 
 // =========================================================
-// ADD PLAYER WIN - SECURE RPC
+// ADD PLAYER WIN
 // =========================================================
 
 async function addPlayerWin() {
@@ -4844,7 +4844,7 @@ async function addPlayerWin() {
         if (error) {
 
             console.error(
-                'ADD WIN RPC ERROR:',
+                'Add player win RPC error:',
                 error
             )
 
@@ -4853,9 +4853,8 @@ async function addPlayerWin() {
 
 
         console.log(
-            'WIN SAVED:',
+            'Win added:',
             username,
-            'TOTAL WINS:',
             data
         )
 
@@ -4863,12 +4862,12 @@ async function addPlayerWin() {
         await loadLeaderboard()
 
 
-        return true
+        return data === true
 
     } catch (error) {
 
         console.error(
-            'ADD WIN EXCEPTION:',
+            'Add player win exception:',
             error
         )
 
