@@ -1,132 +1,142 @@
 // =========================================================
 // RUSSIAN ROULETTE
-// FULL CLEAN VERSION
+// SECURE CLEAN VERSION
 // PART 1 / 2
 // =========================================================
 
-// =========================================================
-// GAME SESSION
-// =========================================================
-
-let currentGameSessionId = null
-
-function createGameSession() {
-    currentGameSessionId =
-        crypto.randomUUID()
-
-    return currentGameSessionId
-}
 
 // =========================================================
 // SUPABASE
 // =========================================================
 
 const SUPABASE_URL =
-'https://kasewgqrkfjiqqjqdvjm.supabase.co'
+    'https://kasewgqrkfjiqqjqdvjm.supabase.co'
 
 const SUPABASE_KEY =
     'sb_publishable_YXo3nrxsvx_uwof30ogQVg_x-ufLtwY'
 
-    
-    let supabaseClient = null
-    
-    
-    if (
-        window.supabase &&
-        typeof window.supabase.createClient === 'function'
-    ) {
-        
-        supabaseClient =
+
+let supabaseClient = null
+
+
+if (
+    window.supabase &&
+    typeof window.supabase.createClient ===
+        'function'
+) {
+
+    supabaseClient =
         window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_KEY
         )
-        
-    } else {
-        
-        console.error(
-            'Supabase library was not loaded.'
-        )
-    }
-    
-    
-    // =========================================================
-    // DOM HELPER
-    // =========================================================
-    
-    const $ = (id) =>
+
+} else {
+
+    console.error(
+        '❌ Supabase library was not loaded.'
+    )
+}
+
+
+// =========================================================
+// GAME SESSION
+// =========================================================
+//
+// IMPORTANT:
+//
+// Session ID HARUS berasal dari Edge Function
+// start-game.
+//
+// Jangan menggunakan:
+//
+// crypto.randomUUID()
+//
+// untuk session keamanan.
+//
+
+let currentGameSessionId =
+    null
+
+
+// =========================================================
+// DOM HELPER
+// =========================================================
+
+const $ =
+    (id) =>
         document.getElementById(id)
-    
-    
-    // =========================================================
-    // DOM ELEMENTS
-    // =========================================================
-    
-    const game =
+
+
+// =========================================================
+// DOM ELEMENTS
+// =========================================================
+
+const game =
     $('game')
-    
-    const table =
+
+const table =
     $('table')
-    
-    const background =
+
+const background =
     $('background')
-    
-    const enemy =
+
+const enemy =
     $('enemy')
-    
-    const enemyText =
+
+const enemyText =
     $('enemyText')
-    
-    
-    // ---------------------------------------------------------
-    // PLAYER ACTION UI
-    // ---------------------------------------------------------
-    
-    const playerActions =
+
+
+// =========================================================
+// PLAYER ACTION UI
+// =========================================================
+
+const playerActions =
     $('playerActions')
-    
-    const coinChoices =
+
+const coinChoices =
     $('coinChoices')
-    
-    const shotMeButton =
+
+const shotMeButton =
     $('shotme')
-    
-    const shotEnemyButton =
+
+const shotEnemyButton =
     $('shotenemy')
-    
-    const shuffleButton =
+
+const shuffleButton =
     $('playershuffle')
-    
-    const headsButton =
+
+const headsButton =
     $('heads')
-    
-    const tailsButton =
+
+const tailsButton =
     $('tails')
-    
-    
-    // ---------------------------------------------------------
-    // TURN UI
-    // ---------------------------------------------------------
-    
-    const turnInfo =
+
+
+// =========================================================
+// TURN UI
+// =========================================================
+
+const turnInfo =
     $('turnInfo')
-    
-    const actionInfo =
+
+const actionInfo =
     $('actionInfo')
-    
-    const enemyAction =
+
+const enemyAction =
     $('enemyAction')
-    
-    
-    // ---------------------------------------------------------
+
+
+// =========================================================
 // CHAMBER UI
-// ---------------------------------------------------------
+// =========================================================
 
 const chambersLeft =
-$('chambersLeft')
+    $('chambersLeft')
 
 const bulletsLeft =
-$('bulletsLeft')
+    $('bulletsLeft')
 
 const blanksLeft =
     $('blanksLeft')
@@ -138,9 +148,9 @@ const shuffleCount =
     $('shuffleCount')
 
 
-// ---------------------------------------------------------
+// =========================================================
 // GUNS
-// ---------------------------------------------------------
+// =========================================================
 
 const playerGun =
     $('gun')
@@ -155,9 +165,9 @@ const enemyGunShotHimself =
     $('enemygunshot')
 
 
-// ---------------------------------------------------------
+// =========================================================
 // COINS
-// ---------------------------------------------------------
+// =========================================================
 
 const coinDown =
     $('coindown')
@@ -169,9 +179,9 @@ const coinTails =
     $('cointails')
 
 
-// ---------------------------------------------------------
+// =========================================================
 // GAME OVER
-// ---------------------------------------------------------
+// =========================================================
 
 const gameOverScreen =
     $('gameOverScreen')
@@ -195,9 +205,9 @@ const gunshotFlash =
     $('gunshotFlash')
 
 
-// ---------------------------------------------------------
+// =========================================================
 // USERNAME
-// ---------------------------------------------------------
+// =========================================================
 
 const usernameInput =
     $('usernameInput')
@@ -209,9 +219,9 @@ const currentUsernameElement =
     $('currentUsername')
 
 
-// ---------------------------------------------------------
+// =========================================================
 // WELCOME
-// ---------------------------------------------------------
+// =========================================================
 
 const welcomeScreen =
     $('welcomeScreen')
@@ -227,6 +237,14 @@ const changeUsernameButton =
 
 const welcomeError =
     $('welcomeError')
+
+
+// =========================================================
+// LEADERBOARD
+// =========================================================
+
+const leaderboardList =
+    $('leaderboardList')
 
 
 // =========================================================
@@ -246,517 +264,137 @@ let hasLoggedIn =
 
 
 // =========================================================
-// VALIDATE USERNAME
+// GAME CONSTANTS
 // =========================================================
 
-function validateUsername(
-    value
-) {
+const MAX_CHAMBERS =
+    6
 
-    const username =
-        String(
-            value ?? ''
-        ).trim()
+const MAX_SHUFFLE_PER_ROUND =
+    2
 
+const SHOOT_DELAY =
+    5000
 
-    if (!username) {
-
-        return {
-            valid: false,
-
-            message:
-                'Please enter your username.'
-        }
-    }
-
-
-    if (
-        username.length < 2
-    ) {
-
-        return {
-            valid: false,
-
-            message:
-                'Username must contain at least 2 characters.'
-        }
-    }
-
-
-    if (
-        username.length > 20
-    ) {
-
-        return {
-            valid: false,
-
-            message:
-                'Username must be 20 characters or less.'
-        }
-    }
-
-
-    if (
-        !/^[a-zA-Z0-9_ ]+$/.test(
-            username
-        )
-    ) {
-
-        return {
-            valid: false,
-
-            message:
-                'Username can only contain letters, numbers, spaces, and _.'
-        }
-    }
-
-
-    return {
-        valid: true,
-
-        username
-    }
-}
+const ENEMY_THINK_DELAY =
+    1500
 
 
 // =========================================================
-// UPDATE USERNAME UI
+// GAME STATE
 // =========================================================
 
-function updateUsernameUI() {
+let gameStarted =
+    false
 
-    if (usernameInput) {
+let gameOver =
+    false
 
-        usernameInput.value =
-            playerUsername
-    }
+let gunHolder =
+    null
 
+let playerCoinGuess =
+    null
 
-    if (currentUsernameElement) {
+let coinAlreadyFlipped =
+    false
 
-        currentUsernameElement.textContent =
-            playerUsername || 'Guest'
-    }
-}
-
-
-// =========================================================
-// WELCOME ERROR
-// =========================================================
-
-function showWelcomeError(
-    message
-) {
-
-    if (!welcomeError)
-        return
-
-
-    welcomeError.textContent =
-        message
-
-
-    welcomeError.classList.add(
-        'show'
-    )
-}
-
-
-function hideWelcomeError() {
-
-    if (!welcomeError)
-        return
-
-
-    welcomeError.textContent =
-        ''
-
-
-    welcomeError.classList.remove(
-        'show'
-    )
-}
+let actionLocked =
+    false
 
 
 // =========================================================
-// SET USERNAME
+// CHAMBERS
 // =========================================================
 
-function setPlayerUsername(
-    value
-) {
+let chambers =
+    []
 
-    const result =
-        validateUsername(
-            value
-        )
+let currentChamber =
+    0
 
-
-    if (!result.valid)
-        return false
+let currentRound =
+    1
 
 
-    playerUsername =
-        result.username
+let roundBulletCount =
+    0
 
-
-    hasLoggedIn =
-        true
-
-
-    localStorage.setItem(
-        'playerUsername',
-        playerUsername
-    )
-
-
-    localStorage.setItem(
-        'playerLoggedIn',
-        'true'
-    )
-
-
-    localStorage.setItem(
-        'playerHasLoggedIn',
-        'true'
-    )
-
-
-    updateUsernameUI()
-
-
-    return true
-}
+let roundBlankCount =
+    0
 
 
 // =========================================================
-// CHANGE USERNAME
+// SHUFFLE STATE
 // =========================================================
 
-function changeUsername() {
+let playerShuffleCount =
+    0
 
-    localStorage.removeItem(
-        'playerUsername'
-    )
-
-    localStorage.removeItem(
-        'playerLoggedIn'
-    )
-
-    localStorage.removeItem(
-        'playerHasLoggedIn'
-    )
-
-
-    playerUsername =
-        ''
-
-    hasLoggedIn =
-        false
-
-
-    if (welcomeUsernameInput) {
-
-        welcomeUsernameInput.value =
-            ''
-    }
-
-
-    hideWelcomeError()
-
-
-    if (welcomeScreen) {
-
-        welcomeScreen.style.display =
-            'flex'
-
-        welcomeScreen.style.opacity =
-            '1'
-
-        welcomeScreen.style.pointerEvents =
-            'auto'
-    }
-
-
-    if (game) {
-
-        game.style.pointerEvents =
-            'none'
-    }
-
-
-    if (welcomeUsernameInput) {
-
-        welcomeUsernameInput.focus()
-    }
-
-
-    updateUsernameUI()
-}
+let enemyShuffleCount =
+    0
 
 
 // =========================================================
-// SHOW WELCOME
+// ENEMY TAUNT
 // =========================================================
 
-function showWelcomeScreen() {
+const enemyTaunts = [
 
-    if (!welcomeScreen)
-        return
+    "You're getting nervous?",
 
+    "Haha... is that all you've got?",
 
-    welcomeScreen.style.display =
-        'flex'
+    "Come on... pick carefully.",
 
+    "Are you sure about that?",
 
-    requestAnimationFrame(
-        () => {
+    "This is getting interesting...",
 
-            welcomeScreen.style.opacity =
-                '1'
+    "Hehehe...",
 
-            welcomeScreen.style.pointerEvents =
-                'auto'
-        }
-    )
+    "Don't disappoint me.",
 
+    "You look scared.",
 
-    if (game) {
+    "Your turn...",
 
-        game.style.pointerEvents =
-            'none'
-    }
+    "Let's see what happens.",
 
+    "You really want to try that?",
 
-    if (welcomeUsernameInput) {
+    "I hope you're ready.",
 
-        welcomeUsernameInput.value =
-            playerUsername
+    "Getting cold feet?",
 
+    "You should have thought twice.",
 
-        if (!playerUsername) {
+    "Don't blink.",
 
-            setTimeout(
-                () => {
+    "I wonder how brave you really are.",
 
-                    welcomeUsernameInput.focus()
+    "That hesitation gave you away.",
 
-                },
-                200
-            )
-        }
-    }
-}
+    "Go ahead... I'm waiting.",
 
+    "This could be your last mistake.",
 
-// =========================================================
-// HIDE WELCOME
-// =========================================================
+    "Heh... you're making this too easy.",
 
-function hideWelcomeScreen() {
+    "Main epep aja dekk."
 
-    if (!welcomeScreen)
-        return
+]
 
 
-    welcomeScreen.style.opacity =
-        '0'
+let enemyTauntTimer =
+    null
 
+let enemyTalkHideTimer =
+    null
 
-    welcomeScreen.style.pointerEvents =
-        'none'
+let enemyIsTalking =
+    false
 
-
-    if (game) {
-
-        game.style.pointerEvents =
-            'auto'
-    }
-
-
-    setTimeout(
-        () => {
-
-            if (!welcomeScreen)
-                return
-
-
-            welcomeScreen.style.display =
-                'none'
-
-        },
-        500
-    )
-}
-
-
-// =========================================================
-// PLAY FROM WELCOME
-// =========================================================
-
-async function playFromWelcome() {
-
-
-
-    console.log('PLAY BUTTON CLICKED')
-
-    const {
-    data,
-    error
-} =
-    await supabaseClient.functions.invoke(
-        'start-game',
-        {
-            body: {
-                player_name:
-                    playerUsername
-            }
-        }
-    )
-
-
-if (error || !data?.success) {
-
-    console.error(
-        'Failed to create game session:',
-        error || data
-    )
-
-    showWelcomeError(
-        'Failed to start game. Please try again.'
-    )
-
-    return
-}
-
-
-gameSessionId =
-    data.session_id
-
-    // Jangan gunakan:
-    // if (gameStarted) return
-    //
-    // Karena welcome screen memang harus bisa
-    // memulai game walaupun state sebelumnya true.
-
-
-    hideWelcomeError()
-
-
-    // Ambil username dari input welcome
-    let username =
-        playerUsername || ''
-
-
-    const input =
-        document.getElementById(
-            'welcomeUsernameInput'
-        )
-
-
-    if (input) {
-
-        username =
-            input.value.trim()
-    }
-
-
-    console.log(
-        'Username:',
-        username
-    )
-
-
-    // Validasi username
-    const result =
-        validateUsername(
-            username
-        )
-
-
-    if (!result.valid) {
-
-        console.log(
-            'Username invalid:',
-            result.message
-        )
-
-
-        showWelcomeError(
-            result.message
-        )
-
-
-        if (input) {
-
-            input.focus()
-
-            input.classList.add(
-                'input-error'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    input.classList.remove(
-                        'input-error'
-                    )
-
-                },
-                500
-            )
-        }
-
-
-        return
-    }
-
-
-    // Simpan username
-    setPlayerUsername(
-        result.username
-    )
-
-
-    // Login
-    hasLoggedIn =
-        true
-
-
-    localStorage.setItem(
-        'playerLoggedIn',
-        'true'
-    )
-
-
-    localStorage.setItem(
-        'playerHasLoggedIn',
-        'true'
-    )
-
-
-    console.log(
-        'Starting game...'
-    )
-
-
-    // Audio harus dimulai dari user interaction
-    startGameSounds()
-
-
-    // Tutup welcome
-    hideWelcomeScreen()
-
-
-    // Mulai game
-    startGame()
-
-
-    console.log(
-        'GAME STARTED'
-    )
-}
 
 // =========================================================
 // AUDIO
@@ -879,7 +517,6 @@ function playSound(
         sound.currentTime =
             0
 
-
         const promise =
             sound.play()
 
@@ -906,6 +543,34 @@ function playSound(
 
 
 // =========================================================
+// RANDOM ENEMY LAUGH
+// =========================================================
+
+function playRandomEnemyLaugh() {
+
+    const laughs = [
+
+        sounds.enemyLaugh1,
+        sounds.enemyLaugh2,
+        sounds.enemyLaugh3
+
+    ]
+
+
+    const randomIndex =
+        Math.floor(
+            Math.random() *
+            laughs.length
+        )
+
+
+    playSound(
+        laughs[randomIndex]
+    )
+}
+
+
+// =========================================================
 // START GAME SOUNDS
 // =========================================================
 
@@ -922,9 +587,7 @@ function startGameSounds() {
     const backgroundSounds = [
 
         sounds.clock,
-
         sounds.detak,
-
         sounds.backsound
 
     ]
@@ -955,6 +618,7 @@ function startGameSounds() {
                     () => {}
                 )
             }
+
         }
     )
 }
@@ -973,9 +637,7 @@ function stopGameSounds() {
     const backgroundSounds = [
 
         sounds.clock,
-
         sounds.detak,
-
         sounds.backsound
 
     ]
@@ -1004,466 +666,365 @@ function stopGameSounds() {
 
 
 // =========================================================
-// RANDOM ENEMY LAUGH
+// CREATE NEW ROUND
 // =========================================================
 
-function playRandomEnemyLaugh() {
+function createNewRound() {
 
-    const laughs = [
+    chambers =
+        []
 
-        sounds.enemyLaugh1,
-
-        sounds.enemyLaugh2,
-
-        sounds.enemyLaugh3
-
-    ]
+    currentChamber =
+        0
 
 
-    const sound =
-        laughs[
+    playerShuffleCount =
+        0
+
+    enemyShuffleCount =
+        0
+
+
+    roundBulletCount =
+        Math.floor(
+            Math.random() * 5
+        ) + 1
+
+
+    roundBlankCount =
+        MAX_CHAMBERS -
+        roundBulletCount
+
+
+    for (
+        let i = 0;
+        i < roundBulletCount;
+        i++
+    ) {
+
+        chambers.push(
+            'bullet'
+        )
+    }
+
+
+    for (
+        let i = 0;
+        i < roundBlankCount;
+        i++
+    ) {
+
+        chambers.push(
+            'blank'
+        )
+    }
+
+
+    shuffleArray(
+        chambers
+    )
+
+
+    console.log(
+        'NEW ROUND:',
+        currentRound
+    )
+
+    console.log(
+        'BULLETS:',
+        roundBulletCount
+    )
+
+    console.log(
+        'BLANKS:',
+        roundBlankCount
+    )
+
+    // Jangan console.log chambers
+    // di production karena ini membocorkan
+    // seluruh isi chamber.
+
+
+    updateChamberUI()
+}
+
+
+// =========================================================
+// SHUFFLE ARRAY
+// =========================================================
+
+function shuffleArray(
+    array
+) {
+
+    for (
+        let i =
+            array.length - 1;
+
+        i > 0;
+
+        i--
+    ) {
+
+        const j =
             Math.floor(
                 Math.random() *
-                laughs.length
+                (i + 1)
             )
+
+
+        ;[
+            array[i],
+            array[j]
+        ] =
+        [
+            array[j],
+            array[i]
+        ]
+
+    }
+
+
+    return array
+}
+
+
+// =========================================================
+// SHUFFLE REMAINING
+// =========================================================
+
+function shuffleChambers() {
+
+    const remainingChambers =
+        chambers.slice(
+            currentChamber
+        )
+
+
+    shuffleArray(
+        remainingChambers
+    )
+
+
+    chambers.splice(
+        currentChamber,
+        remainingChambers.length,
+        ...remainingChambers
+    )
+}
+
+
+// =========================================================
+// PLAYER SHUFFLE
+// =========================================================
+
+function playerShuffle() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'player')
+        return
+
+
+    if (
+        playerShuffleCount >=
+        MAX_SHUFFLE_PER_ROUND
+    ) {
+
+        return
+    }
+
+
+    const remaining =
+        chambers.length -
+        currentChamber
+
+
+    if (remaining <= 1)
+        return
+
+
+    playerShuffleCount++
+
+
+    playSound(
+        sounds.shuffle
+    )
+
+
+    shuffleChambers()
+
+
+    updateChamberUI()
+    updatePlayerButtons()
+}
+
+
+// =========================================================
+// ENEMY SHUFFLE
+// =========================================================
+
+function enemyShuffle() {
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (
+        enemyShuffleCount >=
+        MAX_SHUFFLE_PER_ROUND
+    ) {
+
+        return
+    }
+
+
+    const remaining =
+        chambers.length -
+        currentChamber
+
+
+    if (remaining <= 1)
+        return
+
+
+    enemyShuffleCount++
+
+
+    playSound(
+        sounds.shuffle
+    )
+
+
+    shuffleChambers()
+
+
+    updateChamberUI()
+}
+
+
+// =========================================================
+// RANDOM RESULT
+// =========================================================
+
+function randomResult() {
+
+    if (
+        currentChamber >=
+        chambers.length
+    ) {
+
+        currentRound++
+
+        createNewRound()
+    }
+
+
+    const result =
+        chambers[
+            currentChamber
         ]
 
 
-    playSound(
-        sound
+    currentChamber++
+
+
+    updateChamberUI()
+
+
+    console.log(
+        'CHAMBER USED:',
+        currentChamber,
+        '/',
+        MAX_CHAMBERS
     )
+
+
+    return result
 }
 
 
 // =========================================================
-// GAME CONSTANTS
+// UPDATE CHAMBER UI
 // =========================================================
 
-const MAX_CHAMBERS =
-    6
-
-
-const MAX_SHUFFLE_PER_ROUND =
-    2
-
-
-const SHOOT_DELAY =
-    5000
-
-
-const ENEMY_THINK_DELAY =
-    1500
-
-
-// =========================================================
-// GAME STATE
-// =========================================================
-
-let gameStarted =
-    false
-
-let gameOver =
-    false
-
-let gunHolder =
-    null
-
-let playerCoinGuess =
-    null
-
-let coinAlreadyFlipped =
-    false
-
-let actionLocked =
-    false
-
-
-// =========================================================
-// CHAMBERS
-// =========================================================
-
-let chambers =
-    []
-
-let currentChamber =
-    0
-
-let currentRound =
-    1
-
-let roundBulletCount =
-    0
-
-let roundBlankCount =
-    0
-
-
-// =========================================================
-// SHUFFLE STATE
-// =========================================================
-
-let playerShuffleCount =
-    0
-
-let enemyShuffleCount =
-    0
-
-
-// =========================================================
-// ENEMY TAUNT SYSTEM
-// =========================================================
-
-const enemyTaunts = [
-
-    "You're getting nervous?",
-
-    "Haha... is that all you've got?",
-
-    "Come on... pick carefully.",
-
-    "Are you sure about that?",
-
-    "This is getting interesting...",
-
-    "Hehehe...",
-
-    "Don't disappoint me.",
-
-    "You look scared.",
-
-    "Your turn...",
-
-    "Let's see what happens.",
-
-    "You really want to try that?",
-
-    "I hope you're ready.",
-
-    "Getting cold feet?",
-
-    "You should have thought twice.",
-
-    "Don't blink.",
-
-    "I wonder how brave you really are.",
-
-    "That hesitation gave you away.",
-
-    "Go ahead... I'm waiting.",
-
-    "This could be your last mistake.",
-
-    "Heh... you're making this too easy.",
-
-    "Main epep aja dekk."
-
-]
-
-
-// =========================================================
-// TAUNT VARIABLES
-// =========================================================
-
-let enemyTauntTimer = null
-let enemyTalkHideTimer = null
-
-let enemyIsTalking = false
-
-
-// =========================================================
-// RANDOM LAUGH
-// =========================================================
-
-function playRandomEnemyLaugh() {
-
-    const laughs = [
-        sounds.enemyLaugh1,
-        sounds.enemyLaugh2,
-        sounds.enemyLaugh3
-    ]
-
-    const randomIndex =
-        Math.floor(
-            Math.random() * laughs.length
-        )
-
-    playSound(
-        laughs[randomIndex]
-    )
-}
-
-
-// =========================================================
-// ENEMY TALK
-// =========================================================
-
-function enemyTalk() {
-
-   
-
-
-
-    enemyIsTalking = true
-
-
-    // =====================================================
-    // RANDOM TEXT
-    // =====================================================
-
-    const randomIndex =
-        Math.floor(
-            Math.random() *
-            enemyTaunts.length
+function updateChamberUI() {
+
+    const remaining =
+        Math.max(
+            0,
+            chambers.length -
+            currentChamber
         )
 
 
-    const message =
-        enemyTaunts[randomIndex]
+    if (chambersLeft) {
 
-
-    
-
-
-    // =====================================================
-    // RANDOM LAUGH
-    // =====================================================
-
-    playRandomEnemyLaugh()
-
-
-    // =====================================================
-    // TEXT
-    // =====================================================
-
-    enemyText.textContent =
-        message
-
-
-    // =====================================================
-    // RESET ANIMATION
-    // =====================================================
-
-    enemyText.style.opacity =
-        '0'
-
-    enemyText.style.transform =
-        'translateY(10px) scale(.98)'
-
-
-    /*
-    Force browser reflow.
-    */
-
-    void enemyText.offsetWidth
-
-
-    // =====================================================
-    // SHOW
-    // =====================================================
-
-    enemyText.style.opacity =
-        '1'
-
-    enemyText.style.transform =
-        'translateY(0) scale(1)'
-
-
-    // =====================================================
-    // CLEAR TIMER LAMA
-    // =====================================================
-
-    if (
-        enemyTalkHideTimer !== null
-    ) {
-
-        clearTimeout(
-            enemyTalkHideTimer
-        )
-
+        chambersLeft.textContent =
+            remaining
     }
 
 
-    // =====================================================
-    // HIDE SETELAH 3 DETIK
-    // =====================================================
+    if (bulletsLeft) {
 
-    enemyTalkHideTimer =
-        setTimeout(() => {
-
-            if (!enemyText)
-                return
-
-
-            enemyText.style.opacity =
-                '0'
-
-            enemyText.style.transform =
-                'translateY(10px) scale(.98)'
+        const remainingBullets =
+            chambers
+                .slice(currentChamber)
+                .filter(
+                    value =>
+                        value ===
+                        'bullet'
+                )
+                .length
 
 
-            enemyIsTalking =
-                false
-
-
-            enemyTalkHideTimer =
-                null
-
-
-        }, 3000)
-
-}
-
-
-// =========================================================
-// START TAUNT
-// =========================================================
-
-function startEnemyTaunts() {
-
-    
-
-
-    /*
-    Hapus timer sebelumnya.
-    */
-
-    stopEnemyTaunts()
-
-
-    if (gameOver)
-        return
-
-
-    /*
-    =====================================================
-    TAUNT PERTAMA
-
-    Jangan menunggu 5-10 detik.
-    Enemy langsung ngomong setelah 2 detik.
-    =====================================================
-    */
-
-    enemyTauntTimer =
-        setTimeout(() => {
-
-            if (gameOver)
-                return
-
-
-            enemyTalk()
-
-
-            scheduleEnemyTaunt()
-
-
-        }, 2000)
-
-}
-
-
-// =========================================================
-// SCHEDULE TAUNT BERIKUTNYA
-// =========================================================
-
-function scheduleEnemyTaunt() {
-
-    if (gameOver)
-        return
-
-
-    /*
-    5 - 10 detik.
-    */
-
-    const delay =
-        Math.floor(
-            Math.random() * 5000
-        ) + 5000
-
-
-    
-
-    enemyTauntTimer =
-        setTimeout(() => {
-
-            if (gameOver)
-                return
-
-
-            enemyTalk()
-
-
-            scheduleEnemyTaunt()
-
-
-        }, delay)
-
-}
-
-
-// =========================================================
-// STOP TAUNT
-// =========================================================
-
-function stopEnemyTaunts() {
-
-
-
-    /*
-    Stop main timer.
-    */
-
-    if (
-        enemyTauntTimer !== null
-    ) {
-
-        clearTimeout(
-            enemyTauntTimer
-        )
-
-        enemyTauntTimer =
-            null
-
+        bulletsLeft.textContent =
+            remainingBullets
     }
 
 
-    /*
-    Stop hide timer.
-    */
+    if (blanksLeft) {
 
-    if (
-        enemyTalkHideTimer !== null
-    ) {
+        const remainingBlanks =
+            chambers
+                .slice(currentChamber)
+                .filter(
+                    value =>
+                        value ===
+                        'blank'
+                )
+                .length
 
-        clearTimeout(
-            enemyTalkHideTimer
-        )
 
-        enemyTalkHideTimer =
-            null
-
+        blanksLeft.textContent =
+            remainingBlanks
     }
 
 
-    enemyIsTalking =
-        false
+    if (roundNumber) {
 
-
-    /*
-    Hide text.
-    */
-
-    if (enemyText) {
-
-        enemyText.style.opacity =
-            '0'
-
-        enemyText.style.transform =
-            'translateY(10px) scale(.98)'
-
+        roundNumber.textContent =
+            currentRound
     }
 
+
+    if (shuffleCount) {
+
+        shuffleCount.textContent =
+            playerShuffleCount
+    }
 }
+
+
 // =========================================================
 // FORCE REFLOW
 // =========================================================
@@ -1572,7 +1133,8 @@ function updatePlayerButtons() {
         gameStarted &&
         !gameOver &&
         !actionLocked &&
-        gunHolder === 'player'
+        gunHolder ===
+            'player'
 
 
     if (shotMeButton) {
@@ -1595,6 +1157,24 @@ function updatePlayerButtons() {
             !canPlay ||
             playerShuffleCount >=
                 MAX_SHUFFLE_PER_ROUND
+    }
+
+
+    if (headsButton) {
+
+        headsButton.disabled =
+            gameOver ||
+            actionLocked ||
+            coinAlreadyFlipped
+    }
+
+
+    if (tailsButton) {
+
+        tailsButton.disabled =
+            gameOver ||
+            actionLocked ||
+            coinAlreadyFlipped
     }
 
 
@@ -1659,277 +1239,107 @@ function updateTurnUI() {
             'ENEMY TURN'
 
         turnInfo.style.color =
-            '#b64040'
+            '#e7c87a'
 
         actionInfo.textContent =
-            'The enemy is deciding...'
+            'Enemy is deciding...'
 
         return
     }
 
 
     turnInfo.textContent =
-        'WAITING'
-
-    turnInfo.style.color =
-        '#e7c87a'
+        'COIN FLIP'
 
     actionInfo.textContent =
-        'The coin decides who goes first.'
+        'Choose HEADS or TAILS'
 }
 
 
 // =========================================================
-// ENEMY ACTION TEXT
+// SET ENEMY ACTION
 // =========================================================
 
 function setEnemyAction(
-    text
+    message
 ) {
 
     if (!enemyAction)
         return
 
 
-    enemyAction.style.opacity =
-        '0'
-
-
-    setTimeout(
-        () => {
-
-            if (!enemyAction)
-                return
-
-
-            enemyAction.textContent =
-                text
-
-
-            enemyAction.style.opacity =
-                '1'
-
-        },
-        100
-    )
+    enemyAction.textContent =
+        message
 }
 
 
 // =========================================================
-// SHUFFLE ARRAY
+// SET TURN
 // =========================================================
 
-function shuffleArray(
-    array
+function setTurn(
+    holder
 ) {
-
-    for (
-        let i =
-            array.length - 1;
-
-        i > 0;
-
-        i--
-    ) {
-
-        const j =
-            Math.floor(
-                Math.random() *
-                (i + 1)
-            )
-
-
-        ;[
-            array[i],
-            array[j]
-        ] = [
-            array[j],
-            array[i]
-        ]
-    }
-
-
-    return array
-}
-
-
-// =========================================================
-// CREATE NEW ROUND
-// =========================================================
-
-function createNewRound() {
-
-    chambers =
-        []
-
-    currentChamber =
-        0
-
-
-    playerShuffleCount =
-        0
-
-    enemyShuffleCount =
-        0
-
-
-    // -----------------------------------------------------
-    // 1 - 5 BULLETS
-    // -----------------------------------------------------
-
-    roundBulletCount =
-        Math.floor(
-            Math.random() * 5
-        ) + 1
-
-
-    roundBlankCount =
-        MAX_CHAMBERS -
-        roundBulletCount
-
-
-    // -----------------------------------------------------
-    // CREATE BULLETS
-    // -----------------------------------------------------
-
-    for (
-        let i = 0;
-
-        i <
-        roundBulletCount;
-
-        i++
-    ) {
-
-        chambers.push(
-            'bullet'
-        )
-    }
-
-
-    // -----------------------------------------------------
-    // CREATE BLANKS
-    // -----------------------------------------------------
-
-    for (
-        let i = 0;
-
-        i <
-        roundBlankCount;
-
-        i++
-    ) {
-
-        chambers.push(
-            'blank'
-        )
-    }
-
-
-    // -----------------------------------------------------
-    // SHUFFLE
-    // -----------------------------------------------------
-
-    shuffleArray(
-        chambers
-    )
-
-
-    updateChamberUI()
-
-
-
-}
-
-
-// =========================================================
-// SHUFFLE REMAINING CHAMBERS
-// =========================================================
-
-function shuffleChambers() {
-
-    const remaining =
-        chambers.slice(
-            currentChamber
-        )
-
-
-    shuffleArray(
-        remaining
-    )
-
-
-    chambers.splice(
-        currentChamber,
-
-        remaining.length,
-
-        ...remaining
-    )
-
-
-   
-}
-
-
-// =========================================================
-// PLAYER SHUFFLE
-// =========================================================
-
-function playerShuffle() {
-
-    if (!gameStarted)
-        return
 
     if (gameOver)
         return
 
-    if (actionLocked)
-        return
+
+    gunHolder =
+        holder
+
+    actionLocked =
+        false
+
+
+    playerHideGun()
+    enemyHideGun()
+
+
+    if (coinDown) {
+
+        coinDown.style.opacity =
+            '0'
+    }
+
+
+    if (coinHead) {
+
+        coinHead.style.opacity =
+            '0'
+    }
+
+
+    if (coinTails) {
+
+        coinTails.style.opacity =
+            '0'
+    }
+
+
+    updateTurnUI()
+
 
     if (
-        gunHolder !==
+        holder ===
         'player'
-    )
-        return
+    ) {
+
+        setEnemyAction(
+            'Waiting for your move...'
+        )
 
 
-    if (
-        playerShuffleCount >=
-        MAX_SHUFFLE_PER_ROUND
-    )
-        return
+        showPlayerActions()
+
+    } else {
+
+        hidePlayerActions()
 
 
-    const remaining =
-        chambers.length -
-        currentChamber
-
-
-    if (remaining <= 1)
-        return
-
-
-    playerShuffleCount++
-
-
-    shuffleChambers()
-
-
-    playSound(
-        sounds.shuffle
-    )
-
-
-    setEnemyAction(
-        'You shuffled the chamber...'
-    )
-
-
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'The remaining chambers were shuffled.'
+        setEnemyAction(
+            'Enemy is thinking...'
+        )
     }
 
 
@@ -1938,134 +1348,7 @@ function playerShuffle() {
 
 
 // =========================================================
-// ENEMY SHUFFLE
-// =========================================================
-
-function enemyShuffle() {
-
-    if (gameOver)
-        return false
-
-
-    if (
-        enemyShuffleCount >=
-        MAX_SHUFFLE_PER_ROUND
-    )
-        return false
-
-
-    const remaining =
-        chambers.length -
-        currentChamber
-
-
-    if (remaining <= 1)
-        return false
-
-
-    enemyShuffleCount++
-
-
-    shuffleChambers()
-
-
-    playSound(
-        sounds.shuffle
-    )
-
-
-    return true
-}
-
-
-// =========================================================
-// RANDOM BULLET / BLANK
-// =========================================================
-
-function randomResult() {
-
-    // -----------------------------------------------------
-    // NEW ROUND WHEN ALL CHAMBERS ARE USED
-    // -----------------------------------------------------
-
-    if (
-        currentChamber >=
-        chambers.length
-    ) {
-
-        currentRound++
-
-        createNewRound()
-    }
-
-
-    const result =
-        chambers[
-            currentChamber
-        ]
-
-
-    
-
-
-    currentChamber++
-
-
-    updateChamberUI()
-
-
-    return result
-}
-
-
-// =========================================================
-// UPDATE CHAMBER UI
-// =========================================================
-
-function updateChamberUI() {
-
-    if (chambersLeft) {
-
-        chambersLeft.textContent =
-            Math.max(
-                MAX_CHAMBERS -
-                currentChamber,
-                0
-            )
-    }
-
-
-    if (bulletsLeft) {
-
-        bulletsLeft.textContent =
-            roundBulletCount
-    }
-
-
-    if (blanksLeft) {
-
-        blanksLeft.textContent =
-            roundBlankCount
-    }
-
-
-    if (roundNumber) {
-
-        roundNumber.textContent =
-            currentRound
-    }
-
-
-    if (shuffleCount) {
-
-        shuffleCount.textContent =
-            playerShuffleCount
-    }
-}
-
-
-// =========================================================
-// GUN VISUAL HELPERS
+// GUN HELPERS
 // =========================================================
 
 function hideGun(
@@ -2171,7 +1454,7 @@ function enemyHideGun() {
     hideGun(
         enemyGunShotHimself
     )
-    }
+}
 
 
 // =========================================================
@@ -2257,82 +1540,7 @@ function enemyShotHimself() {
 
 
 // =========================================================
-// SET TURN
-// =========================================================
-
-function setTurn(
-    holder
-) {
-
-    if (gameOver)
-        return
-
-
-    gunHolder =
-        holder
-
-
-    actionLocked =
-        false
-
-
-    playerHideGun()
-    enemyHideGun()
-
-
-    if (coinDown) {
-
-        coinDown.style.opacity =
-            '0'
-    }
-
-
-    if (coinHead) {
-
-        coinHead.style.opacity =
-            '0'
-    }
-
-
-    if (coinTails) {
-
-        coinTails.style.opacity =
-            '0'
-    }
-
-
-    updateTurnUI()
-
-
-    if (
-        holder ===
-        'player'
-    ) {
-
-        setEnemyAction(
-            'Waiting for your move...'
-        )
-
-
-        showPlayerActions()
-
-    } else {
-
-        hidePlayerActions()
-
-
-        setEnemyAction(
-            'Enemy is thinking...'
-        )
-    }
-
-
-    updatePlayerButtons()
-}
-
-
-// =========================================================
-// SET COIN DOWN
+// COIN DOWN
 // =========================================================
 
 function setCoinDown() {
@@ -2441,12 +1649,25 @@ function flipCoinOnce() {
     coinAlreadyFlipped =
         true
 
-
     actionLocked =
         true
 
 
     hidePlayerActions()
+
+
+    if (headsButton) {
+
+        headsButton.disabled =
+            true
+    }
+
+
+    if (tailsButton) {
+
+        tailsButton.disabled =
+            true
+    }
 
 
     if (coinDown) {
@@ -2488,13 +1709,6 @@ function flipCoinOnce() {
             ? 'heads'
             : 'tails'
 
-
-   
-
-
-    // -----------------------------------------------------
-    // FLIP ANIMATION
-    // -----------------------------------------------------
 
     setTimeout(
         () => {
@@ -2543,10 +1757,6 @@ function flipCoinOnce() {
                     )
 
 
-                    // -------------------------------------------------
-                    // SHOW RESULT FOR 2 SEC
-                    // -------------------------------------------------
-
                     setTimeout(
                         () => {
 
@@ -2576,18 +1786,11 @@ function flipCoinOnce() {
                                         result
                                     ) {
 
-                                      
-
-
                                         setTurn(
                                             'player'
                                         )
 
-
                                     } else {
-
-                                     
-
 
                                         setTurn(
                                             'enemy'
@@ -2597,9 +1800,12 @@ function flipCoinOnce() {
                                         setTimeout(
                                             () => {
 
-                                                if (!gameOver) {
+                                                if (
+                                                    !gameOver
+                                                ) {
 
                                                     enemyTurn()
+
                                                 }
 
                                             },
@@ -2626,961 +1832,212 @@ function flipCoinOnce() {
 
 
 // =========================================================
-// PLAYER SHOOT SELF
+// ENEMY TAUNT
 // =========================================================
 
-function playerShootSelf() {
-
-    if (!gameStarted)
-        return
+function enemyTalk() {
 
     if (gameOver)
         return
 
-    if (actionLocked)
-        return
-
-    if (
-        gunHolder !==
-        'player'
-    )
+    if (enemyIsTalking)
         return
 
 
-    actionLocked =
+    enemyIsTalking =
         true
 
 
-    updatePlayerButtons()
+    const randomIndex =
+        Math.floor(
+            Math.random() *
+            enemyTaunts.length
+        )
 
 
-    if (turnInfo) {
+    const message =
+        enemyTaunts[
+            randomIndex
+        ]
 
-        turnInfo.textContent =
-            'YOUR TURN'
+
+    playRandomEnemyLaugh()
+
+
+    if (enemyText) {
+
+        enemyText.textContent =
+            message
+
+        enemyText.style.opacity =
+            '0'
+
+        enemyText.style.transform =
+            'translateY(10px) scale(.98)'
+
+
+        void enemyText.offsetWidth
+
+
+        enemyText.style.opacity =
+            '1'
+
+        enemyText.style.transform =
+            'translateY(0) scale(1)'
     }
 
-
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'You are aiming at yourself...'
-    }
-
-
-    setEnemyAction(
-        'He is pointing it at himself...'
-    )
-
-
-    playerShotHimself()
-
-
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            // -------------------------------------------------
-            // BULLET
-            // -------------------------------------------------
-
-            if (
-                result ===
-                'bullet'
-            ) {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'PLAYER HIT'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerLostGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // -------------------------------------------------
-            // BLANK
-            // -------------------------------------------------
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    setTurn(
-                        'player'
-                    )
-
-
-                    if (actionInfo) {
-
-                        actionInfo.textContent =
-                            'The chamber was empty. You get another turn.'
-                    }
-
-
-                    updatePlayerButtons()
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
-}
-
-
-// =========================================================
-// PLAYER SHOOT ENEMY
-// =========================================================
-
-function playerShootEnemy() {
-
-    if (!gameStarted)
-        return
-
-    if (gameOver)
-        return
-
-    if (actionLocked)
-        return
 
     if (
-        gunHolder !==
-        'player'
-    )
-        return
+        enemyTalkHideTimer !==
+        null
+    ) {
 
-
-    actionLocked =
-        true
-
-
-    updatePlayerButtons()
-
-
-    if (turnInfo) {
-
-        turnInfo.textContent =
-            'YOUR TURN'
+        clearTimeout(
+            enemyTalkHideTimer
+        )
     }
 
 
-    if (actionInfo) {
+    enemyTalkHideTimer =
+        setTimeout(
+            () => {
 
-        actionInfo.textContent =
-            'Aiming at the enemy...'
-    }
+                if (enemyText) {
 
+                    enemyText.style.opacity =
+                        '0'
 
-    setEnemyAction(
-        'You are aiming at me?'
-    )
-
-
-    playerShotEnemy()
-
-
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            // -------------------------------------------------
-            // BULLET
-            // -------------------------------------------------
-
-            if (
-                result ===
-                'bullet'
-            ) {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'ENEMY HIT'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerWonGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // -------------------------------------------------
-            // BLANK
-            // -------------------------------------------------
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    setTurn(
-                        'enemy'
-                    )
-
-
-                    setTimeout(
-                        () => {
-
-                            if (!gameOver) {
-
-                                enemyTurn()
-                            }
-
-                        },
-                        1000
-                    )
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
-}
-// =========================================================
-// PLAYER SHOOT SELF
-// =========================================================
-
-function playerShootSelf() {
-
-    if (!gameStarted)
-        return
-
-    if (gameOver)
-        return
-
-    if (actionLocked)
-        return
-
-    if (gunHolder !== 'player')
-        return
-
-
-    actionLocked = true
-
-    updatePlayerButtons()
-
-
-    if (turnInfo) {
-
-        turnInfo.textContent =
-            'YOUR TURN'
-    }
-
-
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'You are aiming at yourself...'
-    }
-
-
-    setEnemyAction(
-        'He is pointing it at himself...'
-    )
-
-
-    playerShotHimself()
-
-
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            if (result === 'bullet') {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'PLAYER HIT'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerLostGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // =================================================
-            // BLANK
-            // =================================================
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    // Player menembak dirinya sendiri
-                    // dan mendapat blank.
-                    // Player mendapatkan turn lagi.
-
-                    setTurn(
-                        'player'
-                    )
-
-
-                    if (actionInfo) {
-
-                        actionInfo.textContent =
-                            'The chamber was empty. You get another turn.'
-                    }
-
-
-                    updatePlayerButtons()
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
-}
-
-
-// =========================================================
-// PLAYER SHOOT ENEMY
-// =========================================================
-
-function playerShootEnemy() {
-
-    if (!gameStarted)
-        return
-
-    if (gameOver)
-        return
-
-    if (actionLocked)
-        return
-
-    if (gunHolder !== 'player')
-        return
-
-
-    actionLocked = true
-
-    updatePlayerButtons()
-
-
-    if (turnInfo) {
-
-        turnInfo.textContent =
-            'YOUR TURN'
-    }
-
-
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'Aiming at the enemy...'
-    }
-
-
-    setEnemyAction(
-        'You are aiming at me?'
-    )
-
-
-    playerShotEnemy()
-
-
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            if (result === 'bullet') {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'ENEMY HIT'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerWonGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // =================================================
-            // BLANK
-            // =================================================
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    setTurn(
-                        'enemy'
-                    )
-
-
-                    setTimeout(
-                        () => {
-
-                            if (!gameOver)
-                                enemyTurn()
-
-                        },
-                        1000
-                    )
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
-}
-
-
-// =========================================================
-// ENEMY TURN
-// =========================================================
-
-function enemyTurn() {
-
-    if (!gameStarted)
-        return
-
-    if (gameOver)
-        return
-
-    if (gunHolder !== 'enemy')
-        return
-
-    if (actionLocked)
-        return
-
-
-    hidePlayerActions()
-
-
-    if (turnInfo) {
-
-        turnInfo.textContent =
-            'ENEMY TURN'
-    }
-
-
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'The enemy is deciding...'
-    }
-
-
-    setEnemyAction(
-        'Enemy is thinking...'
-    )
-
-
-    enemyHideGun()
-
-
-    actionLocked = true
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            const remaining =
-                chambers.length -
-                currentChamber
-
-
-            const canShuffle =
-                enemyShuffleCount <
-                    MAX_SHUFFLE_PER_ROUND &&
-                remaining > 1
-
-
-            // =================================================
-            // ENEMY SHUFFLE
-            // =================================================
-
-            if (
-                canShuffle &&
-                Math.random() < 0.30
-            ) {
-
-                setEnemyAction(
-                    'Enemy is shuffling the chamber...'
-                )
-
-
-                if (actionInfo) {
-
-                    actionInfo.textContent =
-                        'The enemy is rearranging the chambers...'
+                    enemyText.style.transform =
+                        'translateY(10px) scale(.98)'
                 }
 
 
-                enemyShuffle()
+                enemyIsTalking =
+                    false
 
+                enemyTalkHideTimer =
+                    null
 
-                setTimeout(
-                    () => {
-
-                        if (gameOver)
-                            return
-
-
-                        actionLocked = false
-
-
-                        enemyTurn()
-
-                    },
-                    1000
-                )
-
-
-                return
-            }
-
-
-            // =================================================
-            // ENEMY CHOOSES TARGET
-            // =================================================
-
-            actionLocked = false
-
-
-            if (Math.random() < 0.5) {
-
-                setEnemyAction(
-                    'Enemy is aiming at you...'
-                )
-
-
-                enemyShootPlayer()
-
-            } else {
-
-                setEnemyAction(
-                    'Enemy is aiming at himself...'
-                )
-
-
-                enemyShootSelf()
-            }
-
-        },
-        ENEMY_THINK_DELAY
-    )
+            },
+            3000
+        )
 }
 
 
 // =========================================================
-// ENEMY SHOOT PLAYER
+// START ENEMY TAUNTS
 // =========================================================
 
-function enemyShootPlayer() {
+function startEnemyTaunts() {
 
-    if (!gameStarted)
-        return
+    stopEnemyTaunts()
+
 
     if (gameOver)
         return
 
-    if (actionLocked)
-        return
 
-    if (gunHolder !== 'enemy')
-        return
+    enemyTauntTimer =
+        setTimeout(
+            () => {
 
-
-    actionLocked = true
-
-
-    if (turnInfo) {
-
-        turnInfo.textContent =
-            'ENEMY TURN'
-    }
+                if (gameOver)
+                    return
 
 
-    if (actionInfo) {
-
-        actionInfo.textContent =
-            'Enemy is aiming at you...'
-    }
+                enemyTalk()
 
 
-    setEnemyAction(
-        'Enemy is pointing the gun at you.'
-    )
+                scheduleEnemyTaunt()
 
-
-    enemyShotPlayer()
-
-
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            if (result === 'bullet') {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'BANG!'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerLostGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // =================================================
-            // BLANK
-            // =================================================
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    setTurn(
-                        'player'
-                    )
-
-
-                    updatePlayerButtons()
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
+            },
+            2000
+        )
 }
 
 
 // =========================================================
-// ENEMY SHOOT SELF
+// SCHEDULE ENEMY TAUNT
 // =========================================================
 
-function enemyShootSelf() {
-
-    if (!gameStarted)
-        return
+function scheduleEnemyTaunt() {
 
     if (gameOver)
         return
 
-    if (actionLocked)
-        return
 
-    if (gunHolder !== 'enemy')
-        return
-
-
-    actionLocked = true
+    const delay =
+        Math.floor(
+            Math.random() *
+            5000
+        ) + 5000
 
 
-    if (turnInfo) {
+    enemyTauntTimer =
+        setTimeout(
+            () => {
 
-        turnInfo.textContent =
-            'ENEMY TURN'
+                if (gameOver)
+                    return
+
+
+                enemyTalk()
+
+
+                scheduleEnemyTaunt()
+
+            },
+            delay
+        )
+}
+
+
+// =========================================================
+// STOP ENEMY TAUNTS
+// =========================================================
+
+function stopEnemyTaunts() {
+
+    if (
+        enemyTauntTimer !==
+        null
+    ) {
+
+        clearTimeout(
+            enemyTauntTimer
+        )
+
+        enemyTauntTimer =
+            null
     }
 
 
-    if (actionInfo) {
+    if (
+        enemyTalkHideTimer !==
+        null
+    ) {
 
-        actionInfo.textContent =
-            'Enemy is aiming at himself...'
+        clearTimeout(
+            enemyTalkHideTimer
+        )
+
+        enemyTalkHideTimer =
+            null
     }
 
 
-    setEnemyAction(
-        'Enemy pulls the trigger...'
-    )
+    enemyIsTalking =
+        false
 
 
-    enemyShotHimself()
+    if (enemyText) {
 
+        enemyText.style.opacity =
+            '0'
 
-    const result =
-        randomResult()
-
-
-    setTimeout(
-        () => {
-
-            if (gameOver)
-                return
-
-
-            if (result === 'bullet') {
-
-                playSound(
-                    sounds.shot
-                )
-
-
-                gunshotEffect()
-
-
-                setEnemyAction(
-                    'BANG!'
-                )
-
-
-                setTimeout(
-                    () => {
-
-                        playerWonGame()
-
-                    },
-                    700
-                )
-
-
-                return
-            }
-
-
-            // =================================================
-            // BLANK
-            // =================================================
-
-            playSound(
-                sounds.blank
-            )
-
-
-            setEnemyAction(
-                'CLICK... BLANK'
-            )
-
-
-            setTimeout(
-                () => {
-
-                    if (gameOver)
-                        return
-
-
-                    // Enemy menembak dirinya sendiri
-                    // dan mendapat blank.
-                    // Enemy mendapatkan turn lagi.
-
-                    setTurn(
-                        'enemy'
-                    )
-
-
-                    if (actionInfo) {
-
-                        actionInfo.textContent =
-                            'The chamber was empty. Enemy gets another turn.'
-                    }
-
-
-                    setTimeout(
-                        () => {
-
-                            if (!gameOver)
-                                enemyTurn()
-
-                        },
-                        1000
-                    )
-
-                },
-                500
-            )
-
-        },
-        SHOOT_DELAY
-    )
+        enemyText.style.transform =
+            'translateY(10px) scale(.98)'
+    }
 }
 
 
@@ -3650,9 +2107,684 @@ function gunshotEffect() {
     )
 }
 
+
+// =========================================================
+// PLAYER SHOOT SELF
+// =========================================================
+
+function playerShootSelf() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'player')
+        return
+
+
+    actionLocked =
+        true
+
+
+    updatePlayerButtons()
+
+
+    if (turnInfo) {
+
+        turnInfo.textContent =
+            'YOUR TURN'
+    }
+
+
+    if (actionInfo) {
+
+        actionInfo.textContent =
+            'You are aiming at yourself...'
+    }
+
+
+    setEnemyAction(
+        'He is pointing it at himself...'
+    )
+
+
+    playerShotHimself()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(
+        () => {
+
+            if (gameOver)
+                return
+
+
+            if (
+                result ===
+                'bullet'
+            ) {
+
+                playSound(
+                    sounds.shot
+                )
+
+
+                gunshotEffect()
+
+
+                setEnemyAction(
+                    'PLAYER HIT'
+                )
+
+
+                setTimeout(
+                    () => {
+
+                        playerLostGame()
+
+                    },
+                    700
+                )
+
+
+                return
+            }
+
+
+            playSound(
+                sounds.blank
+            )
+
+
+            setEnemyAction(
+                'CLICK... BLANK'
+            )
+
+
+            setTimeout(
+                () => {
+
+                    if (gameOver)
+                        return
+
+
+                    setTurn(
+                        'player'
+                    )
+
+
+                    if (actionInfo) {
+
+                        actionInfo.textContent =
+                            'The chamber was empty. You get another turn.'
+                    }
+
+
+                },
+                500
+            )
+
+        },
+        SHOOT_DELAY
+    )
+}
+
+
+// =========================================================
+// PLAYER SHOOT ENEMY
+// =========================================================
+
+function playerShootEnemy() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'player')
+        return
+
+
+    actionLocked =
+        true
+
+
+    updatePlayerButtons()
+
+
+    if (turnInfo) {
+
+        turnInfo.textContent =
+            'YOUR TURN'
+    }
+
+
+    if (actionInfo) {
+
+        actionInfo.textContent =
+            'Aiming at the enemy...'
+    }
+
+
+    setEnemyAction(
+        'You are aiming at me?'
+    )
+
+
+    playerShotEnemy()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(
+        () => {
+
+            if (gameOver)
+                return
+
+
+            if (
+                result ===
+                'bullet'
+            ) {
+
+                playSound(
+                    sounds.shot
+                )
+
+
+                gunshotEffect()
+
+
+                setEnemyAction(
+                    'ENEMY HIT'
+                )
+
+
+                setTimeout(
+                    () => {
+
+                        playerWonGame()
+
+                    },
+                    700
+                )
+
+
+                return
+            }
+
+
+            playSound(
+                sounds.blank
+            )
+
+
+            setEnemyAction(
+                'CLICK... BLANK'
+            )
+
+
+            setTimeout(
+                () => {
+
+                    if (gameOver)
+                        return
+
+
+                    setTurn(
+                        'enemy'
+                    )
+
+
+                    setTimeout(
+                        () => {
+
+                            if (
+                                !gameOver
+                            ) {
+
+                                enemyTurn()
+
+                            }
+
+                        },
+                        1000
+                    )
+
+                },
+                500
+            )
+
+        },
+        SHOOT_DELAY
+    )
+}
+
+
+// =========================================================
+// ENEMY TURN
+// =========================================================
+
+function enemyTurn() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+    if (actionLocked)
+        return
+
+
+    hidePlayerActions()
+
+
+    if (turnInfo) {
+
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+
+        actionInfo.textContent =
+            'The enemy is deciding...'
+    }
+
+
+    setEnemyAction(
+        'Enemy is thinking...'
+    )
+
+
+    enemyHideGun()
+
+
+    actionLocked =
+        true
+
+
+    setTimeout(
+        () => {
+
+            if (gameOver)
+                return
+
+
+            const remaining =
+                chambers.length -
+                currentChamber
+
+
+            const canShuffle =
+                enemyShuffleCount <
+                    MAX_SHUFFLE_PER_ROUND &&
+                remaining > 1
+
+
+            if (
+                canShuffle &&
+                Math.random() < 0.30
+            ) {
+
+                setEnemyAction(
+                    'Enemy is shuffling the chamber...'
+                )
+
+
+                if (actionInfo) {
+
+                    actionInfo.textContent =
+                        'The enemy is rearranging the chambers...'
+                }
+
+
+                actionLocked =
+                    false
+
+
+                enemyShuffle()
+
+
+                setTimeout(
+                    () => {
+
+                        if (gameOver)
+                            return
+
+
+                        enemyTurn()
+
+                    },
+                    1000
+                )
+
+
+                return
+            }
+
+
+            actionLocked =
+                false
+
+
+            if (
+                Math.random() <
+                0.5
+            ) {
+
+                setEnemyAction(
+                    'Enemy is aiming at you...'
+                )
+
+
+                enemyShootPlayer()
+
+            } else {
+
+                setEnemyAction(
+                    'Enemy is aiming at himself...'
+                )
+
+
+                enemyShootSelf()
+            }
+
+        },
+        ENEMY_THINK_DELAY
+    )
+}
+
+
+// =========================================================
+// ENEMY SHOOT PLAYER
+// =========================================================
+
+function enemyShootPlayer() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+
+    actionLocked =
+        true
+
+
+    if (turnInfo) {
+
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+
+        actionInfo.textContent =
+            'Enemy is aiming at you...'
+    }
+
+
+    setEnemyAction(
+        'Enemy is pointing the gun at you.'
+    )
+
+
+    enemyShotPlayer()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(
+        () => {
+
+            if (gameOver)
+                return
+
+
+            if (
+                result ===
+                'bullet'
+            ) {
+
+                playSound(
+                    sounds.shot
+                )
+
+
+                gunshotEffect()
+
+
+                setEnemyAction(
+                    'BANG!'
+                )
+
+
+                setTimeout(
+                    () => {
+
+                        playerLostGame()
+
+                    },
+                    700
+                )
+
+
+                return
+            }
+
+
+            playSound(
+                sounds.blank
+            )
+
+
+            setEnemyAction(
+                'CLICK... BLANK'
+            )
+
+
+            setTimeout(
+                () => {
+
+                    if (gameOver)
+                        return
+
+
+                    setTurn(
+                        'player'
+                    )
+
+
+                    updatePlayerButtons()
+
+                },
+                500
+            )
+
+        },
+        SHOOT_DELAY
+    )
+}
+
+
+// =========================================================
+// ENEMY SHOOT SELF
+// =========================================================
+
+function enemyShootSelf() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+
+    actionLocked =
+        true
+
+
+    if (turnInfo) {
+
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+
+        actionInfo.textContent =
+            'Enemy is aiming at himself...'
+    }
+
+
+    setEnemyAction(
+        'Enemy pulls the trigger...'
+    )
+
+
+    enemyShotHimself()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(
+        () => {
+
+            if (gameOver)
+                return
+
+
+            if (
+                result ===
+                'bullet'
+            ) {
+
+                playSound(
+                    sounds.shot
+                )
+
+
+                gunshotEffect()
+
+
+                setEnemyAction(
+                    'BANG!'
+                )
+
+
+                setTimeout(
+                    () => {
+
+                        playerWonGame()
+
+                    },
+                    700
+                )
+
+
+                return
+            }
+
+
+            playSound(
+                sounds.blank
+            )
+
+
+            setEnemyAction(
+                'CLICK... BLANK'
+            )
+
+
+            setTimeout(
+                () => {
+
+                    if (gameOver)
+                        return
+
+
+                    setTurn(
+                        'enemy'
+                    )
+
+
+                    if (actionInfo) {
+
+                        actionInfo.textContent =
+                            'The chamber was empty. Enemy gets another turn.'
+                    }
+
+
+                    setTimeout(
+                        () => {
+
+                            if (!gameOver)
+                                enemyTurn()
+
+                        },
+                        1000
+                    )
+
+                },
+                500
+            )
+
+        },
+        SHOOT_DELAY
+    )
+}
+
+
 // =========================================================
 // PLAYER WON
 // =========================================================
+//
+// IMPORTANT:
+//
+// Jangan kirim player_name ke server.
+// Server harus mengambil player dari
+// session yang dibuat oleh start-game.
+//
 
 async function playerWonGame() {
 
@@ -3671,31 +2803,18 @@ async function playerWonGame() {
     stopEnemyTaunts()
 
 
-    // ==============================
-    // SAVE WIN TO SERVER
-    // ==============================
-
     const winSaved =
         await addPlayerWin()
 
 
-    // ==============================
-    // GET UPDATED WINS
-    // ==============================
-
-    const currentWins =
-        await getPlayerWins()
-
-
     console.log(
-        'Win saved:',
+        'WIN SAVED:',
         winSaved
     )
 
-    console.log(
-        'Current wins:',
-        currentWins
-    )
+
+    let currentWins =
+        await getPlayerWins()
 
 
     if (enemy) {
@@ -3744,7 +2863,9 @@ async function playerWonGame() {
             if (gameOverTitle) {
 
                 gameOverTitle.textContent =
-                    'Just Luck..'
+                    winSaved
+                        ? 'Just Luck..'
+                        : 'You won... but the win could not be saved.'
             }
 
 
@@ -3789,6 +2910,145 @@ async function playerWonGame() {
         800
     )
 }
+
+
+// =========================================================
+// ADD PLAYER WIN
+// SERVER VERSION
+// =========================================================
+//
+// Client hanya mengirim:
+//
+// session_id
+//
+// Tidak mengirim:
+//
+// player_name
+//
+// Server harus:
+// 1. mencari session
+// 2. memastikan session milik player
+// 3. memastikan game belum claimed
+// 4. memastikan player memang menang
+// 5. menambah win
+// 6. menandai session sebagai claimed
+//
+// =========================================================
+
+async function addPlayerWin() {
+
+    console.log(
+        '========== ADD PLAYER WIN =========='
+    )
+
+
+    if (!supabaseClient) {
+
+        console.error(
+            '❌ Supabase client tidak tersedia.'
+        )
+
+        return false
+    }
+
+
+    if (!currentGameSessionId) {
+
+        console.error(
+            '❌ Tidak ada currentGameSessionId.'
+        )
+
+        return false
+    }
+
+
+    console.log(
+        'Sending session:',
+        currentGameSessionId
+    )
+
+
+    try {
+
+        const response =
+            await supabaseClient.functions.invoke(
+                'add-player-win',
+                {
+                    body: {
+
+                        session_id:
+                            currentGameSessionId
+
+                    }
+                }
+            )
+
+
+        console.log(
+            'Edge Function response:',
+            response
+        )
+
+
+        const {
+            data,
+            error
+        } =
+            response
+
+
+        if (error) {
+
+            console.error(
+                '❌ Edge Function ERROR:',
+                error
+            )
+
+            return false
+        }
+
+
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            console.error(
+                '❌ SERVER MENOLAK WIN:',
+                data
+            )
+
+            return false
+        }
+
+
+        console.log(
+            '✅ WIN BERHASIL DISIMPAN.'
+        )
+
+
+        // Session jangan dipakai lagi.
+        currentGameSessionId =
+            null
+
+
+        await loadLeaderboard()
+
+
+        return true
+
+    } catch (error) {
+
+        console.error(
+            '❌ ADD PLAYER WIN EXCEPTION:',
+            error
+        )
+
+        return false
+    }
+}
+
+
 // =========================================================
 // GET PLAYER WINS
 // =========================================================
@@ -3815,7 +3075,9 @@ async function getPlayerWins() {
     } =
         await supabaseClient
             .from('leaderboard')
-            .select('wins')
+            .select(
+                'wins'
+            )
             .eq(
                 'username',
                 username
@@ -3856,9 +3118,11 @@ function playerLostGame() {
         return
 
 
-    gameOver = true
+    gameOver =
+        true
 
-    actionLocked = true
+    actionLocked =
+        true
 
 
     stopGameSounds()
@@ -3966,6 +3230,1060 @@ function resetVisualState() {
     }
 
 
+    hideAllGuns()
+
+
+    setCoinDown()
+}
+
+
+// =========================================================
+// RESTART GAME
+// =========================================================
+
+function restartGame() {
+
+    stopEnemyTaunts()
+    stopGameSounds()
+
+
+    if (gameOverContent) {
+
+        gameOverContent.style.opacity =
+            '0'
+
+        gameOverContent.style.transform =
+            'translateY(20px) scale(.95)'
+    }
+
+
+    if (gameOverScreen) {
+
+        gameOverScreen.style.opacity =
+            '0'
+
+        gameOverScreen.style.background =
+            'rgba(0, 0, 0, 0)'
+
+        gameOverScreen.style.pointerEvents =
+            'none'
+    }
+
+
+    resetVisualState()
+
+
+    gameOver =
+        false
+
+    actionLocked =
+        false
+
+    gunHolder =
+        null
+
+    playerCoinGuess =
+        null
+
+    coinAlreadyFlipped =
+        false
+
+
+    // Session lama harus selalu dibuang.
+    currentGameSessionId =
+        null
+
+
+    startGame()
+}
+
+
+// =========================================================
+// ESCAPE HTML
+// =========================================================
+
+function escapeHTML(
+    text
+) {
+
+    const div =
+        document.createElement(
+            'div'
+        )
+
+
+    div.textContent =
+        text ?? ''
+
+
+    return div.innerHTML
+}
+// =========================================================
+// PLAYER SHOOT SELF
+// =========================================================
+
+function playerShootSelf() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'player')
+        return
+
+
+    actionLocked = true
+
+    updatePlayerButtons()
+
+
+    if (turnInfo) {
+        turnInfo.textContent = 'YOUR TURN'
+    }
+
+
+    if (actionInfo) {
+        actionInfo.textContent =
+            'You are aiming at yourself...'
+    }
+
+
+    setEnemyAction(
+        'He is pointing it at himself...'
+    )
+
+
+    playerShotHimself()
+
+
+    const result = randomResult()
+
+
+    setTimeout(() => {
+
+        if (gameOver)
+            return
+
+
+        if (result === 'bullet') {
+
+            playSound(
+                sounds.shot
+            )
+
+
+            gunshotEffect()
+
+
+            setEnemyAction(
+                'PLAYER HIT'
+            )
+
+
+            setTimeout(() => {
+
+                playerLostGame()
+
+            }, 700)
+
+
+            return
+        }
+
+
+        // =================================================
+        // BLANK
+        // =================================================
+
+        playSound(
+            sounds.blank
+        )
+
+
+        setEnemyAction(
+            'CLICK... BLANK'
+        )
+
+
+        setTimeout(() => {
+
+            setTurn(
+                'player'
+            )
+
+
+            if (actionInfo) {
+
+                actionInfo.textContent =
+                    'The chamber was empty. You get another turn.'
+            }
+
+
+            updatePlayerButtons()
+
+        }, 500)
+
+    }, SHOOT_DELAY)
+}
+
+
+// =========================================================
+// PLAYER SHOOT ENEMY
+// =========================================================
+
+function playerShootEnemy() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'player')
+        return
+
+
+    actionLocked = true
+
+
+    updatePlayerButtons()
+
+
+    if (turnInfo) {
+        turnInfo.textContent =
+            'YOUR TURN'
+    }
+
+
+    if (actionInfo) {
+        actionInfo.textContent =
+            'Aiming at the enemy...'
+    }
+
+
+    setEnemyAction(
+        'You are aiming at me?'
+    )
+
+
+    playerShotEnemy()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(() => {
+
+        if (gameOver)
+            return
+
+
+        if (result === 'bullet') {
+
+            playSound(
+                sounds.shot
+            )
+
+
+            gunshotEffect()
+
+
+            setEnemyAction(
+                'ENEMY HIT'
+            )
+
+
+            setTimeout(() => {
+
+                playerWonGame()
+
+            }, 700)
+
+
+            return
+        }
+
+
+        // =================================================
+        // BLANK
+        // =================================================
+
+        playSound(
+            sounds.blank
+        )
+
+
+        setEnemyAction(
+            'CLICK... BLANK'
+        )
+
+
+        setTimeout(() => {
+
+            setTurn(
+                'enemy'
+            )
+
+
+            setTimeout(() => {
+
+                enemyTurn()
+
+            }, 1000)
+
+        }, 500)
+
+    }, SHOOT_DELAY)
+}
+
+
+// =========================================================
+// ENEMY TURN
+// =========================================================
+
+function enemyTurn() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+    if (actionLocked)
+        return
+
+
+    hidePlayerActions()
+
+
+    if (turnInfo) {
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+        actionInfo.textContent =
+            'The enemy is deciding...'
+    }
+
+
+    setEnemyAction(
+        'Enemy is thinking...'
+    )
+
+
+    enemyHideGun()
+
+
+    actionLocked = true
+
+
+    setTimeout(() => {
+
+        if (gameOver)
+            return
+
+
+        const remaining =
+            chambers.length -
+            currentChamber
+
+
+        const canShuffle =
+            enemyShuffleCount <
+                MAX_SHUFFLE_PER_ROUND &&
+            remaining > 1
+
+
+        // =================================================
+        // ENEMY SHUFFLE
+        // =================================================
+
+        if (
+            canShuffle &&
+            Math.random() < 0.30
+        ) {
+
+            setEnemyAction(
+                'Enemy is shuffling the chamber...'
+            )
+
+
+            if (actionInfo) {
+
+                actionInfo.textContent =
+                    'The enemy is rearranging the chambers...'
+            }
+
+
+            enemyShuffle()
+
+
+            setTimeout(() => {
+
+                if (gameOver)
+                    return
+
+
+                actionLocked = false
+
+
+                enemyTurn()
+
+            }, 1000)
+
+
+            return
+        }
+
+
+        actionLocked = false
+
+
+        // =================================================
+        // ENEMY TARGET
+        // =================================================
+
+        if (
+            Math.random() < 0.5
+        ) {
+
+            setEnemyAction(
+                'Enemy is aiming at you...'
+            )
+
+
+            enemyShootPlayer()
+
+        } else {
+
+            setEnemyAction(
+                'Enemy is aiming at himself...'
+            )
+
+
+            enemyShootSelf()
+        }
+
+    }, ENEMY_THINK_DELAY)
+}
+
+
+// =========================================================
+// ENEMY SHOOT PLAYER
+// =========================================================
+
+function enemyShootPlayer() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+
+    actionLocked = true
+
+
+    if (turnInfo) {
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+        actionInfo.textContent =
+            'Enemy is aiming at you...'
+    }
+
+
+    setEnemyAction(
+        'Enemy is pointing the gun at you.'
+    )
+
+
+    enemyShotPlayer()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(() => {
+
+        if (gameOver)
+            return
+
+
+        if (result === 'bullet') {
+
+            playSound(
+                sounds.shot
+            )
+
+
+            gunshotEffect()
+
+
+            setEnemyAction(
+                'BANG!'
+            )
+
+
+            setTimeout(() => {
+
+                playerLostGame()
+
+            }, 700)
+
+
+            return
+        }
+
+
+        // =================================================
+        // BLANK
+        // =================================================
+
+        playSound(
+            sounds.blank
+        )
+
+
+        setEnemyAction(
+            'CLICK... BLANK'
+        )
+
+
+        setTimeout(() => {
+
+            setTurn(
+                'player'
+            )
+
+
+            updatePlayerButtons()
+
+        }, 500)
+
+    }, SHOOT_DELAY)
+}
+
+
+// =========================================================
+// ENEMY SHOOT SELF
+// =========================================================
+
+function enemyShootSelf() {
+
+    if (!gameStarted)
+        return
+
+    if (gameOver)
+        return
+
+    if (actionLocked)
+        return
+
+    if (gunHolder !== 'enemy')
+        return
+
+
+    actionLocked = true
+
+
+    if (turnInfo) {
+        turnInfo.textContent =
+            'ENEMY TURN'
+    }
+
+
+    if (actionInfo) {
+        actionInfo.textContent =
+            'Enemy is aiming at himself...'
+    }
+
+
+    setEnemyAction(
+        'Enemy pulls the trigger...'
+    )
+
+
+    enemyShotHimself()
+
+
+    const result =
+        randomResult()
+
+
+    setTimeout(() => {
+
+        if (gameOver)
+            return
+
+
+        if (result === 'bullet') {
+
+            playSound(
+                sounds.shot
+            )
+
+
+            gunshotEffect()
+
+
+            setEnemyAction(
+                'BANG!'
+            )
+
+
+            setTimeout(() => {
+
+                playerWonGame()
+
+            }, 700)
+
+
+            return
+        }
+
+
+        // =================================================
+        // BLANK
+        // =================================================
+
+        playSound(
+            sounds.blank
+        )
+
+
+        setEnemyAction(
+            'CLICK... BLANK'
+        )
+
+
+        setTimeout(() => {
+
+            setTurn(
+                'enemy'
+            )
+
+
+            if (actionInfo) {
+
+                actionInfo.textContent =
+                    'The chamber was empty. Enemy gets another turn.'
+            }
+
+
+            setTimeout(() => {
+
+                enemyTurn()
+
+            }, 1000)
+
+        }, 500)
+
+    }, SHOOT_DELAY)
+}
+
+
+// =========================================================
+// GUNSHOT EFFECT
+// =========================================================
+
+function gunshotEffect() {
+
+    if (!game)
+        return
+
+
+    game.classList.remove(
+        'gunshot-shake'
+    )
+
+
+    forceReflow(
+        game
+    )
+
+
+    game.classList.add(
+        'gunshot-shake'
+    )
+
+
+    if (gunshotFlash) {
+
+        gunshotFlash.classList.remove(
+            'gunshot-flash'
+        )
+
+
+        forceReflow(
+            gunshotFlash
+        )
+
+
+        gunshotFlash.classList.add(
+            'gunshot-flash'
+        )
+    }
+
+
+    setTimeout(() => {
+
+        if (game) {
+
+            game.classList.remove(
+                'gunshot-shake'
+            )
+        }
+
+
+        if (gunshotFlash) {
+
+            gunshotFlash.classList.remove(
+                'gunshot-flash'
+            )
+        }
+
+    }, 500)
+}
+
+
+// =========================================================
+// PLAYER WON
+// =========================================================
+
+async function playerWonGame() {
+
+    if (gameOver)
+        return
+
+
+    gameOver = true
+
+    actionLocked = true
+
+
+    stopGameSounds()
+    stopEnemyTaunts()
+
+
+    // =====================================================
+    // SAVE WIN
+    // =====================================================
+
+    const winSaved =
+        await addPlayerWin()
+
+
+    // =====================================================
+    // GET UPDATED WIN
+    // =====================================================
+
+    const currentWins =
+        await getPlayerWins()
+
+
+    console.log(
+        'Win saved:',
+        winSaved
+    )
+
+
+    console.log(
+        'Current wins:',
+        currentWins
+    )
+
+
+    // =====================================================
+    // ENEMY DEATH
+    // =====================================================
+
+    if (enemy) {
+
+        enemy.classList.add(
+            'enemy-death'
+        )
+    }
+
+
+    if (enemyGunShotPlayer) {
+
+        enemyGunShotPlayer.classList.add(
+            'enemy-death'
+        )
+    }
+
+
+    if (enemyGunShotHimself) {
+
+        enemyGunShotHimself.classList.add(
+            'enemy-death'
+        )
+    }
+
+
+    // =====================================================
+    // GAME OVER SCREEN
+    // =====================================================
+
+    setTimeout(() => {
+
+        enemyHideGun()
+
+
+        if (gameOverScreen) {
+
+            gameOverScreen.style.pointerEvents =
+                'auto'
+
+            gameOverScreen.style.opacity =
+                '1'
+
+            gameOverScreen.style.background =
+                'rgba(0, 0, 0, .88)'
+        }
+
+
+        if (gameOverTitle) {
+
+            gameOverTitle.textContent =
+                'Just Luck..'
+        }
+
+
+        if (newChallengerButton) {
+
+            newChallengerButton.style.display =
+                'block'
+        }
+
+
+        if (continueText) {
+
+            continueText.style.display =
+                'none'
+        }
+
+
+        if (winStats) {
+
+            winStats.textContent =
+                currentWins
+        }
+
+
+        if (gameOverContent) {
+
+            setTimeout(() => {
+
+                gameOverContent.style.opacity =
+                    '1'
+
+                gameOverContent.style.transform =
+                    'translateY(0) scale(1)'
+
+            }, 300)
+        }
+
+
+        // Refresh leaderboard
+        loadLeaderboard()
+
+    }, 800)
+}
+
+
+// =========================================================
+// GET PLAYER WINS
+// =========================================================
+
+async function getPlayerWins() {
+
+    if (!supabaseClient)
+        return 0
+
+
+    if (!playerUsername)
+        return 0
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from('leaderboard')
+            .select('wins')
+            .eq(
+                'username',
+                playerUsername
+            )
+            .maybeSingle()
+
+
+    if (error) {
+
+        console.error(
+            'Get player wins error:',
+            error
+        )
+
+
+        return 0
+    }
+
+
+    if (!data)
+        return 0
+
+
+    return (
+        Number(data.wins) || 0
+    )
+}
+
+
+// =========================================================
+// PLAYER LOST
+// =========================================================
+
+function playerLostGame() {
+
+    if (gameOver)
+        return
+
+
+    gameOver = true
+
+    actionLocked = true
+
+
+    stopGameSounds()
+    stopEnemyTaunts()
+
+
+    playerHideGun()
+
+
+    if (gameOverScreen) {
+
+        gameOverScreen.style.pointerEvents =
+            'auto'
+
+        gameOverScreen.style.opacity =
+            '1'
+
+        gameOverScreen.style.background =
+            'rgba(0, 0, 0, .94)'
+    }
+
+
+    if (gameOverTitle) {
+
+        gameOverTitle.textContent =
+            "Maybe in another life, you'll be luckier."
+    }
+
+
+    if (newChallengerButton) {
+
+        newChallengerButton.style.display =
+            'none'
+    }
+
+
+    if (continueText) {
+
+        continueText.style.display =
+            'block'
+    }
+
+
+    if (winStats) {
+
+        winStats.textContent =
+            ''
+    }
+
+
+    if (gameOverContent) {
+
+        setTimeout(() => {
+
+            gameOverContent.style.opacity =
+                '1'
+
+            gameOverContent.style.transform =
+                'translateY(0) scale(1)'
+
+        }, 500)
+    }
+}
+
+
+// =========================================================
+// RESET VISUAL STATE
+// =========================================================
+
+function resetVisualState() {
+
+    if (enemy) {
+
+        enemy.classList.remove(
+            'enemy-death'
+        )
+
+        enemy.style.opacity =
+            '1'
+    }
+
+
+    if (enemyGunShotPlayer) {
+
+        enemyGunShotPlayer.classList.remove(
+            'enemy-death'
+        )
+
+        enemyGunShotPlayer.style.opacity =
+            '1'
+    }
+
+
+    if (enemyGunShotHimself) {
+
+        enemyGunShotHimself.classList.remove(
+            'enemy-death'
+        )
+
+        enemyGunShotHimself.style.opacity =
+            '1'
+    }
+
+
     if (playerGun) {
 
         playerGun.style.opacity =
@@ -4027,15 +4345,20 @@ function restartGame() {
     // RESET STATE
     // =====================================================
 
-    gameOver = false
+    gameOver =
+        false
 
-    actionLocked = false
+    actionLocked =
+        false
 
-    gunHolder = null
+    gunHolder =
+        null
 
-    playerCoinGuess = null
+    playerCoinGuess =
+        null
 
-    coinAlreadyFlipped = false
+    coinAlreadyFlipped =
+        false
 
 
     startGame()
@@ -4118,14 +4441,15 @@ function updateUsernameUI() {
     if (usernameInput) {
 
         usernameInput.value =
-            playerUsername || ''
+            playerUsername
     }
 
 
     if (currentUsernameElement) {
 
         currentUsernameElement.textContent =
-            playerUsername || 'Guest'
+            playerUsername ||
+            'Guest'
     }
 }
 
@@ -4145,10 +4469,6 @@ function setPlayerUsername(username) {
     if (!username)
         return false
 
-
-    // =====================================================
-    // BATASI 20 KARAKTER
-    // =====================================================
 
     username =
         username.substring(
@@ -4172,8 +4492,6 @@ function setPlayerUsername(username) {
         'true'
     )
 
-
-    // Kompatibilitas sistem lama
 
     localStorage.setItem(
         'playerHasLoggedIn',
@@ -4202,16 +4520,15 @@ function showWelcomeScreen() {
         'flex'
 
 
-    requestAnimationFrame(
-        () => {
+    requestAnimationFrame(() => {
 
-            welcomeScreen.style.opacity =
-                '1'
+        welcomeScreen.style.opacity =
+            '1'
 
-            welcomeScreen.style.pointerEvents =
-                'auto'
-        }
-    )
+        welcomeScreen.style.pointerEvents =
+            'auto'
+
+    })
 
 
     if (game) {
@@ -4220,10 +4537,6 @@ function showWelcomeScreen() {
             'none'
     }
 
-
-    // =====================================================
-    // JIKA SUDAH ADA USERNAME
-    // =====================================================
 
     if (playerUsername) {
 
@@ -4241,14 +4554,11 @@ function showWelcomeScreen() {
                 ''
 
 
-            setTimeout(
-                () => {
+            setTimeout(() => {
 
-                    welcomeUsernameInput.focus()
+                welcomeUsernameInput.focus()
 
-                },
-                300
-            )
+            }, 300)
         }
     }
 }
@@ -4278,19 +4588,16 @@ function hideWelcomeScreen() {
     }
 
 
-    setTimeout(
-        () => {
+    setTimeout(() => {
 
-            if (!welcomeScreen)
-                return
+        if (!welcomeScreen)
+            return
 
 
-            welcomeScreen.style.display =
-                'none'
+        welcomeScreen.style.display =
+            'none'
 
-        },
-        500
-    )
+    }, 500)
 }
 
 
@@ -4320,10 +4627,6 @@ function showWelcomeError(message) {
     )
 }
 
-
-// =========================================================
-// HIDE WELCOME ERROR
-// =========================================================
 
 function hideWelcomeError() {
 
@@ -4389,16 +4692,6 @@ function validateUsername(username) {
         }
     }
 
-
-    // =====================================================
-    // HANYA BOLEH:
-    //
-    // a-z
-    // A-Z
-    // 0-9
-    // underscore
-    // spasi
-    // =====================================================
 
     if (
         !/^[a-zA-Z0-9_ ]+$/.test(
@@ -4469,26 +4762,19 @@ function playFromWelcome() {
             )
 
 
-            setTimeout(
-                () => {
+            setTimeout(() => {
 
-                    welcomeUsernameInput.classList.remove(
-                        'input-error'
-                    )
+                welcomeUsernameInput.classList.remove(
+                    'input-error'
+                )
 
-                },
-                500
-            )
+            }, 500)
         }
 
 
         return
     }
 
-
-    // =====================================================
-    // SIMPAN USERNAME
-    // =====================================================
 
     setPlayerUsername(
         result.username
@@ -4513,9 +4799,6 @@ function playFromWelcome() {
 
     // =====================================================
     // AUDIO
-    //
-    // Dipanggil dari click PLAY sehingga browser
-    // menganggapnya sebagai user interaction.
     // =====================================================
 
     startGameSounds()
@@ -4536,36 +4819,20 @@ function playFromWelcome() {
 // WELCOME PLAY BUTTON
 // =========================================================
 
-const playButton =
-    document.getElementById(
-        'welcomePlayButton'
-    )
+if (welcomePlayButton) {
 
-
-if (playButton) {
-
-
-
-    playButton.addEventListener(
+    welcomePlayButton.addEventListener(
         'click',
-        function (event) {
+        (event) => {
 
             event.preventDefault()
-            event.stopPropagation()
-
 
 
             playFromWelcome()
-
         }
     )
-
-} else {
-
-    console.error(
-        'ERROR: #welcomePlayButton tidak ditemukan!'
-    )
 }
+
 
 // =========================================================
 // ENTER TO PLAY
@@ -4587,13 +4854,14 @@ if (welcomeUsernameInput) {
 
                 playFromWelcome()
             }
+
         }
     )
 }
 
 
 // =========================================================
-// SAVE USERNAME BUTTON
+// SAVE USERNAME
 // =========================================================
 
 if (saveUsername) {
@@ -4654,6 +4922,7 @@ if (usernameInput) {
                     saveUsername.click()
                 }
             }
+
         }
     )
 }
@@ -4834,104 +5103,138 @@ function renderLeaderboard(data) {
 
 // =========================================================
 // ADD PLAYER WIN
-// SERVER VERSION
+// =========================================================
+// IMPORTANT:
+//
+// Jangan lagi:
+//
+// supabaseClient
+//     .from('leaderboard')
+//     .update(...)
+//
+//
+// Jangan juga:
+//
+// supabaseClient.rpc(
+//     'add_player_win',
+//     ...
+// )
+//
+//
+// Win harus diproses oleh Edge Function.
 // =========================================================
 
 async function addPlayerWin() {
 
-    console.log('========== ADD PLAYER WIN ==========')
-
-    console.log(
-        'Username:',
-        playerUsername
-    )
-
-    console.log(
-        'Game Session:',
-        currentGameSessionId
-    )
-
     if (!supabaseClient) {
 
         console.error(
-            '❌ supabaseClient tidak ada'
+            'addPlayerWin: Supabase client unavailable.'
         )
 
         return false
     }
+
 
     if (!playerUsername) {
 
         console.error(
-            '❌ playerUsername kosong'
+            'addPlayerWin: playerUsername is empty.'
         )
 
         return false
     }
 
-    if (!currentGameSessionId) {
+
+    const username =
+        String(
+            playerUsername
+        ).trim()
+
+
+    if (!username) {
 
         console.error(
-            '❌ currentGameSessionId kosong'
+            'addPlayerWin: invalid username.'
         )
 
         return false
     }
 
+
+    console.log(
+        'addPlayerWin: sending win request...'
+    )
+
+
     try {
-
-        const response =
-            await supabaseClient.functions.invoke(
-                'add-player-win',
-                {
-                    body: {
-
-                        player_name:
-                            playerUsername,
-
-                        game_session_id:
-                            currentGameSessionId
-                    }
-                }
-            )
-
-        console.log(
-            'Edge Function response:',
-            response
-        )
 
         const {
             data,
             error
-        } = response
+        } =
+            await supabaseClient.functions.invoke(
+                'add-player-win',
+                {
+                    body: {
+                        player_name:
+                            username
+                    }
+                }
+            )
+
 
         if (error) {
 
             console.error(
-                '❌ Edge Function ERROR:',
+                'addPlayerWin Edge Function error:',
                 error
             )
 
             return false
         }
 
+
         console.log(
-            '✅ WIN BERHASIL:',
+            'addPlayerWin response:',
             data
         )
+
+
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            console.error(
+                'addPlayerWin rejected:',
+                data
+            )
+
+            return false
+        }
+
+
+        console.log(
+            'WIN SAVED SUCCESSFULLY'
+        )
+
 
         return true
 
     } catch (error) {
 
         console.error(
-            '❌ EXCEPTION:',
+            'addPlayerWin exception:',
             error
         )
+
 
         return false
     }
 }
+
+
 // =========================================================
 // TEST SUPABASE
 // =========================================================
@@ -4971,11 +5274,20 @@ async function testSupabase() {
     }
 
 
+    console.log(
+        'Supabase connected.'
+    )
+
+
+    console.log(
+        'Leaderboard:',
+        data
+    )
 }
 
 
 // =========================================================
-// PARALLAX RECT
+// PARALLAX
 // =========================================================
 
 let rect =
@@ -4999,208 +5311,153 @@ window.addEventListener(
 
 
 // =========================================================
-// PARALLAX OPTIMIZED FOR DESKTOP + MOBILE
-// =========================================================
-
-let parallaxX = 0
-let parallaxY = 0
-
-let parallaxRunning = false
-
-const isMobile =
-    window.matchMedia(
-        '(max-width: 768px)'
-    ).matches
-
-
-function updateParallax() {
-
-    if (!rect)
-        return
-
-
-    const centerX =
-        isMobile
-            ? window.innerWidth / 2
-            : rect.left + rect.width / 2
-
-
-    const centerY =
-        isMobile
-            ? window.innerHeight / 2
-            : rect.top + rect.height / 2
-
-
-    const posX =
-        (parallaxX - centerX) / centerX
-
-
-    const posY =
-        (parallaxY - centerY) / centerY
-
-
-    // =====================================================
-    // BACKGROUND
-    // =====================================================
-
-    if (background) {
-
-        background.style.backgroundPosition =
-            `calc(50% + ${-posX * 20}px)
-             calc(50% + ${-posY * 10}px)`
-    }
-
-
-    // =====================================================
-    // TABLE
-    // =====================================================
-
-    if (table) {
-
-        table.style.backgroundPosition =
-            `calc(50% + ${posX * 5}px)
-             calc(50% + ${posY * 2.5}px)`
-    }
-
-
-    // =====================================================
-    // DESKTOP ONLY
-    // =====================================================
-
-    if (!isMobile) {
-
-        // PLAYER GUN
-
-        if (playerGun) {
-
-            playerGun.style.backgroundPosition =
-                `calc(50% + ${posX * 10}px)
-                 calc(50% + ${posY * 10}px)`
-        }
-
-
-        // PLAYER GUN SELF
-
-        if (playerGunShotHimself) {
-
-            playerGunShotHimself.style.backgroundPosition =
-                `calc(50% + ${posX * 10}px)
-                 calc(50% + ${posY * 10}px)`
-        }
-
-
-        // COIN DOWN
-
-        if (coinDown) {
-
-            coinDown.style.backgroundPosition =
-                `calc(50% + ${posX * 5}px)
-                 calc(50% + ${posY * 2.5}px)`
-        }
-
-
-        // COIN HEAD
-
-        if (coinHead) {
-
-            coinHead.style.backgroundPosition =
-                `calc(50% + ${posX * 6}px)
-                 calc(50% + ${posY * 3}px)`
-        }
-
-
-        // COIN TAILS
-
-        if (coinTails) {
-
-            coinTails.style.backgroundPosition =
-                `calc(50% + ${posX * 6}px)
-                 calc(50% + ${posY * 3}px)`
-        }
-
-
-        // ENEMY
-
-        if (enemy) {
-
-            enemy.style.backgroundPosition =
-                `calc(50% + ${-posX * 5}px)
-                 calc(50% + ${-posY * 2}px)`
-        }
-
-
-        // ENEMY GUN
-
-        if (enemyGunShotPlayer) {
-
-            enemyGunShotPlayer.style.backgroundPosition =
-                `calc(50% + ${-posX * 1.5}px)
-                 calc(50% + ${-posY * 1.5}px)`
-        }
-
-
-        if (enemyGunShotHimself) {
-
-            enemyGunShotHimself.style.backgroundPosition =
-                `calc(50% + ${-posX * 1.5}px)
-                 calc(50% + ${-posY * 1.5}px)`
-        }
-
-    }
-}
-
-
-// =========================================================
-// DESKTOP
+// DESKTOP PARALLAX
 // =========================================================
 
 window.addEventListener(
     'mousemove',
     (e) => {
 
-        if (isMobile)
+        if (!rect)
             return
 
 
-        parallaxX =
-            e.clientX
-
-        parallaxY =
-            e.clientY
+        const centerX =
+            rect.left +
+            rect.width / 2
 
 
-        if (parallaxRunning)
-            return
+        const centerY =
+            rect.top +
+            rect.height / 2
 
 
-        parallaxRunning =
-            true
+        const posX =
+            (
+                e.clientX -
+                centerX
+            ) / centerX
 
 
-        requestAnimationFrame(
-            () => {
+        const posY =
+            (
+                e.clientY -
+                centerY
+            ) / centerY
 
-                parallaxRunning =
-                    false
 
-                updateParallax()
+        if (playerGun) {
 
-            }
-        )
+            playerGun.style.backgroundPositionX =
+                `calc(50% + ${posX * 10}px)`
+
+            playerGun.style.backgroundPositionY =
+                `calc(50% + ${posY * 10}px)`
+        }
+
+
+        if (playerGunShotHimself) {
+
+            playerGunShotHimself.style.backgroundPositionX =
+                `calc(50% + ${posX * 10}px)`
+
+            playerGunShotHimself.style.backgroundPositionY =
+                `calc(50% + ${posY * 10}px)`
+        }
+
+
+        if (table) {
+
+            table.style.backgroundPositionX =
+                `calc(50% + ${posX * 5}px)`
+
+            table.style.backgroundPositionY =
+                `calc(50% + ${posY * 2.5}px)`
+        }
+
+
+        if (coinDown) {
+
+            coinDown.style.backgroundPositionX =
+                `calc(50% + ${posX * 5}px)`
+
+            coinDown.style.backgroundPositionY =
+                `calc(50% + ${posY * 2.5}px)`
+        }
+
+
+        if (coinHead) {
+
+            coinHead.style.backgroundPositionX =
+                `calc(50% + ${posX * 6}px)`
+
+            coinHead.style.backgroundPositionY =
+                `calc(50% + ${posY * 3}px)`
+        }
+
+
+        if (coinTails) {
+
+            coinTails.style.backgroundPositionX =
+                `calc(50% + ${posX * 6}px)`
+
+            coinTails.style.backgroundPositionY =
+                `calc(50% + ${posY * 3}px)`
+        }
+
+
+        if (background) {
+
+            background.style.backgroundPositionX =
+                `calc(50% + ${-posX * 20}px)`
+
+            background.style.backgroundPositionY =
+                `calc(50% + ${-posY * 10}px)`
+        }
+
+
+        if (enemy) {
+
+            enemy.style.backgroundPositionX =
+                `calc(50% + ${-posX * 5}px)`
+
+            enemy.style.backgroundPositionY =
+                `calc(50% + ${-posY * 2}px)`
+        }
+
+
+        if (enemyGunShotPlayer) {
+
+            enemyGunShotPlayer.style.backgroundPositionX =
+                `calc(50% + ${-posX * 1.5}px)`
+
+            enemyGunShotPlayer.style.backgroundPositionY =
+                `calc(50% + ${-posY * 1.5}px)`
+        }
+
+
+        if (enemyGunShotHimself) {
+
+            enemyGunShotHimself.style.backgroundPositionX =
+                `calc(50% + ${-posX * 1.5}px)`
+
+            enemyGunShotHimself.style.backgroundPositionY =
+                `calc(50% + ${-posY * 1.5}px)`
+        }
 
     }
 )
 
 
 // =========================================================
-// MOBILE
+// MOBILE PARALLAX
 // =========================================================
 
 window.addEventListener(
     'touchmove',
     (e) => {
 
-        if (!isMobile)
+        if (!rect)
             return
 
 
@@ -5211,31 +5468,50 @@ window.addEventListener(
             return
 
 
-        parallaxX =
-            e.touches[0].clientX
-
-        parallaxY =
-            e.touches[0].clientY
+        const touch =
+            e.touches[0]
 
 
-        if (parallaxRunning)
-            return
+        const centerX =
+            window.innerWidth / 2
 
 
-        parallaxRunning =
-            true
+        const centerY =
+            window.innerHeight / 2
 
 
-        requestAnimationFrame(
-            () => {
+        const posX =
+            (
+                touch.clientX -
+                centerX
+            ) / centerX
 
-                parallaxRunning =
-                    false
 
-                updateParallax()
+        const posY =
+            (
+                touch.clientY -
+                centerY
+            ) / centerY
 
-            }
-        )
+
+        if (background) {
+
+            background.style.backgroundPositionX =
+                `calc(50% + ${-posX * 20}px)`
+
+            background.style.backgroundPositionY =
+                `calc(50% + ${-posY * 10}px)`
+        }
+
+
+        if (table) {
+
+            table.style.backgroundPositionX =
+                `calc(50% + ${posX * 5}px)`
+
+            table.style.backgroundPositionY =
+                `calc(50% + ${posY * 2.5}px)`
+        }
 
     },
     {
@@ -5243,57 +5519,103 @@ window.addEventListener(
     }
 )
 
+
 // =========================================================
 // START GAME
 // =========================================================
 
 function startGame() {
 
-    
-    // Buat session baru setiap game
-    createGameSession()
+    gameStarted =
+        true
 
-    gameStarted = true
-    gameOver = false
 
-    gunHolder = null
-    playerCoinGuess = null
-    coinAlreadyFlipped = false
-    actionLocked = false
+    gameOver =
+        false
 
-    currentRound = 1
-    currentChamber = 0
 
-    playerShuffleCount = 0
-    enemyShuffleCount = 0
+    gunHolder =
+        null
+
+
+    playerCoinGuess =
+        null
+
+
+    coinAlreadyFlipped =
+        false
+
+
+    actionLocked =
+        false
+
+
+    currentRound =
+        1
+
+
+    currentChamber =
+        0
+
+
+    playerShuffleCount =
+        0
+
+
+    enemyShuffleCount =
+        0
+
 
     resetVisualState()
+
+
     createNewRound()
 
+
     setCoinDown()
+
+
     hidePlayerActions()
+
+
     showCoinUI()
 
+
     if (turnInfo) {
-        turnInfo.textContent = 'COIN FLIP'
-        turnInfo.style.color = '#e7c87a'
+
+        turnInfo.textContent =
+            'COIN FLIP'
+
+        turnInfo.style.color =
+            '#e7c87a'
     }
 
+
     if (actionInfo) {
+
         actionInfo.textContent =
             'Choose HEADS or TAILS'
     }
+
 
     setEnemyAction(
         'Waiting for the coin...'
     )
 
+
     updateChamberUI()
+
+
     updatePlayerButtons()
 }
 
+
 // =========================================================
 // GLOBAL FUNCTIONS
+// =========================================================
+//
+// Dipasang supaya HTML onclick masih bekerja.
+//
 // =========================================================
 
 window.playerShootEnemy =
@@ -5365,7 +5687,6 @@ if (welcomeScreen) {
     )
 
 
-    // Fallback
     startGame()
 }
 
