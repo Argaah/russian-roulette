@@ -578,12 +578,6 @@ function playRandomEnemyLaugh() {
 
 function startGameSounds() {
 
-    gameSessionId = crypto.randomUUID()
-
-console.log(
-    'New game session:',
-    gameSessionId
-)
 
     if (gameSoundsStarted)
         return
