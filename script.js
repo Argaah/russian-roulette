@@ -11,111 +11,111 @@ let gameSessionId = null
 // =========================================================
 
 const SUPABASE_URL =
-    'https://kasewgqrkfjiqqjqdvjm.supabase.co'
+'https://kasewgqrkfjiqqjqdvjm.supabase.co'
 
 const SUPABASE_KEY =
     'sb_publishable_YXo3nrxsvx_uwof30ogQVg_x-ufLtwY'
 
-
-let supabaseClient = null
-
-
-if (
-    window.supabase &&
-    typeof window.supabase.createClient === 'function'
-) {
-
-    supabaseClient =
+    
+    let supabaseClient = null
+    
+    
+    if (
+        window.supabase &&
+        typeof window.supabase.createClient === 'function'
+    ) {
+        
+        supabaseClient =
         window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_KEY
         )
-
-} else {
-
-    console.error(
-        'Supabase library was not loaded.'
-    )
-}
-
-
-// =========================================================
-// DOM HELPER
-// =========================================================
-
-const $ = (id) =>
-    document.getElementById(id)
-
-
-// =========================================================
-// DOM ELEMENTS
-// =========================================================
-
-const game =
+        
+    } else {
+        
+        console.error(
+            'Supabase library was not loaded.'
+        )
+    }
+    
+    
+    // =========================================================
+    // DOM HELPER
+    // =========================================================
+    
+    const $ = (id) =>
+        document.getElementById(id)
+    
+    
+    // =========================================================
+    // DOM ELEMENTS
+    // =========================================================
+    
+    const game =
     $('game')
-
-const table =
+    
+    const table =
     $('table')
-
-const background =
+    
+    const background =
     $('background')
-
-const enemy =
+    
+    const enemy =
     $('enemy')
-
-const enemyText =
+    
+    const enemyText =
     $('enemyText')
-
-
-// ---------------------------------------------------------
-// PLAYER ACTION UI
-// ---------------------------------------------------------
-
-const playerActions =
+    
+    
+    // ---------------------------------------------------------
+    // PLAYER ACTION UI
+    // ---------------------------------------------------------
+    
+    const playerActions =
     $('playerActions')
-
-const coinChoices =
+    
+    const coinChoices =
     $('coinChoices')
-
-const shotMeButton =
+    
+    const shotMeButton =
     $('shotme')
-
-const shotEnemyButton =
+    
+    const shotEnemyButton =
     $('shotenemy')
-
-const shuffleButton =
+    
+    const shuffleButton =
     $('playershuffle')
-
-const headsButton =
+    
+    const headsButton =
     $('heads')
-
-const tailsButton =
+    
+    const tailsButton =
     $('tails')
-
-
-// ---------------------------------------------------------
-// TURN UI
-// ---------------------------------------------------------
-
-const turnInfo =
+    
+    
+    // ---------------------------------------------------------
+    // TURN UI
+    // ---------------------------------------------------------
+    
+    const turnInfo =
     $('turnInfo')
-
-const actionInfo =
+    
+    const actionInfo =
     $('actionInfo')
-
-const enemyAction =
+    
+    const enemyAction =
     $('enemyAction')
-
-
-// ---------------------------------------------------------
+    
+    
+    // ---------------------------------------------------------
 // CHAMBER UI
 // ---------------------------------------------------------
 
 const chambersLeft =
-    $('chambersLeft')
+$('chambersLeft')
 
 const bulletsLeft =
-    $('bulletsLeft')
+$('bulletsLeft')
 
 const blanksLeft =
     $('blanksLeft')
