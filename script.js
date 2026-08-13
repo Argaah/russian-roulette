@@ -4741,29 +4741,21 @@ async function playFromWelcome() {
     if (gameStarted)
         return
 
-
     hideWelcomeError()
 
-
-    // =====================================================
-    // GET USERNAME
-    // =====================================================
 
     let username =
         playerUsername || ''
 
 
     if (welcomeUsernameInput) {
-
         username =
             welcomeUsernameInput.value.trim()
     }
 
 
     const validation =
-        validateUsername(
-            username
-        )
+        validateUsername(username)
 
 
     if (!validation.valid) {
@@ -4772,39 +4764,18 @@ async function playFromWelcome() {
             validation.message
         )
 
-        if (welcomeUsernameInput) {
-
-            welcomeUsernameInput.focus()
-
-            welcomeUsernameInput.classList.add(
-                'input-error'
-            )
-
-            setTimeout(() => {
-
-                welcomeUsernameInput.classList.remove(
-                    'input-error'
-                )
-
-            }, 500)
-        }
+        welcomeUsernameInput?.focus()
 
         return
     }
 
-
-    // =====================================================
-    // SAVE USERNAME
-    // =====================================================
 
     setPlayerUsername(
         validation.username
     )
 
 
-    hasLoggedIn =
-        true
-
+    hasLoggedIn = true
 
     localStorage.setItem(
         'playerLoggedIn',
@@ -4822,120 +4793,141 @@ async function playFromWelcome() {
         playerUsername
     )
 
-
-    // =====================================================
-    // CREATE SERVER SESSION
-    // =====================================================
-
-    if (!supabaseClient) {
-
-        console.error(
-            'Supabase client tidak tersedia.'
-        )
-
-        showWelcomeError(
-            'Supabase is unavailable.'
-        )
-
-        return
-    }
-
-
     console.log(
         'Creating server game session...'
     )
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.functions.invoke(
-            'start-game',
-            {
-                body: {
-                    player_name:
-                        playerUsername
+    try {
+
+        const response =
+            await supabaseClient.functions.invoke(
+                'start-game',
+                {
+                    body: {
+                        player_name:
+                            playerUsername
+                    }
                 }
-            }
+            )
+
+
+        console.log(
+            'START-GAME RESPONSE OBJECT:',
+            response
         )
 
 
-    console.log(
-        'START-GAME RESPONSE:',
-        data
-    )
+        const {
+            data,
+            error
+        } = response
 
 
-    if (error) {
+        if (error) {
+
+            console.error(
+                'START-GAME ERROR:',
+                error
+            )
+
+
+            if (error.context) {
+
+                try {
+
+                    const errorBody =
+                        await error.context.text()
+
+                    console.error(
+                        'START-GAME ERROR BODY:',
+                        errorBody
+                    )
+
+                } catch (e) {
+
+                    console.error(
+                        'Cannot read start-game error:',
+                        e
+                    )
+                }
+            }
+
+
+            showWelcomeError(
+                'Failed to start game.'
+            )
+
+            return
+        }
+
+
+        console.log(
+            'START-GAME DATA:',
+            data
+        )
+
+
+        if (
+            !data ||
+            data.success !== true ||
+            !data.session_id
+        ) {
+
+            console.error(
+                'Invalid start-game response:',
+                data
+            )
+
+            showWelcomeError(
+                'Game session was not created.'
+            )
+
+            return
+        }
+
+
+        // =========================================
+        // SESSION CREATED BY SERVER
+        // =========================================
+
+        window.gameSessionId =
+            data.session_id
+
+
+        console.log(
+            'GAME SESSION CREATED:',
+            window.gameSessionId
+        )
+
+
+        // =========================================
+        // START GAME
+        // =========================================
+
+        startGameSounds()
+
+        hideWelcomeScreen()
+
+        startGame()
+
+
+        console.log(
+            'GAME STARTED'
+        )
+
+    } catch (error) {
 
         console.error(
-            'START-GAME ERROR:',
+            'START-GAME EXCEPTION:',
             error
         )
 
         showWelcomeError(
             'Failed to start game.'
         )
-
-        return
     }
-
-
-    if (
-        !data ||
-        !data.success ||
-        !data.session_id
-    ) {
-
-        console.error(
-            'Invalid START-GAME response:',
-            data
-        )
-
-        showWelcomeError(
-            'Game session was not created.'
-        )
-
-        return
-    }
-
-
-    // =====================================================
-    // SAVE SERVER SESSION
-    // =====================================================
-
-    window.gameSessionId =
-        data.session_id
-
-
-    console.log(
-        'GAME SESSION CREATED:',
-        window.gameSessionId
-    )
-
-
-    // =====================================================
-    // START AUDIO
-    // =====================================================
-
-    startGameSounds()
-
-
-    // =====================================================
-    // HIDE WELCOME
-    // =====================================================
-
-    hideWelcomeScreen()
-
-
-    // =====================================================
-    // START GAME
-    // =====================================================
-
-    startGame()
 }
-
 // =========================================================
 // WELCOME PLAY BUTTON
 // =========================================================
