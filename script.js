@@ -3780,35 +3780,43 @@
     }
 
 
-    // =====================================================
-    // WELCOME PLAY BUTTON
-    // =====================================================
+ // =====================================================
+// PLAY BUTTON - DESKTOP + MOBILE
+// =====================================================
 
-    if (welcomePlayButton) {
+if (welcomePlayButton) {
 
-        welcomePlayButton.addEventListener(
-            'click',
-            event => {
+    const handlePlay = (event) => {
 
-                event.preventDefault()
+        event.preventDefault()
+        event.stopPropagation()
 
-                event.stopPropagation()
+        // =================================================
+        // JALANKAN LOGIC PLAY LAMA DI SINI
+        // =================================================
 
-
-                playFromWelcome()
-
-            }
-        )
-
-    } else {
-
-        console.error(
-            'ERROR: #welcomePlayButton tidak ditemukan.'
-        )
+        // Contoh:
+        // startGame()
 
     }
 
 
+    welcomePlayButton.addEventListener(
+        'click',
+        handlePlay,
+        false
+    )
+
+
+    welcomePlayButton.addEventListener(
+        'touchend',
+        handlePlay,
+        {
+            passive: false
+        }
+    )
+
+}
     // =====================================================
     // ENTER IN WELCOME
     // =====================================================
