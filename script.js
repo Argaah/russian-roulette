@@ -3624,36 +3624,33 @@ async function playerWonGame() {
     stopEnemyTaunts()
 
 
+ 
     // =====================================================
-    // SAVE WIN
-    // =====================================================
+// SIMPAN WIN KE SUPABASE
+// =====================================================
 
-    const winSaved =
-        await addPlayerWin()
-
-
-    // =====================================================
-    // GET LATEST WIN
-    // =====================================================
-
-    const currentWins =
-        await getPlayerWins()
+const winSaved =
+    await addPlayerWin()
 
 
-    console.log(
-        'PLAYER WON'
-    )
+console.log(
+    '🏆 WIN SAVED:',
+    winSaved
+)
 
-    console.log(
-        'WIN SAVED:',
-        winSaved
-    )
 
-    console.log(
-        'CURRENT WINS:',
-        currentWins
-    )
+// =====================================================
+// AMBIL TOTAL WIN TERBARU
+// =====================================================
 
+const currentWins =
+    await getPlayerWins()
+
+
+console.log(
+    '🏆 CURRENT WINS:',
+    currentWins
+)
 
     // =====================================================
     // ENEMY DEATH
@@ -4798,17 +4795,29 @@ function renderLeaderboard(data) {
 // ADD PLAYER WIN
 // =========================================================
 
+// =========================================================
+// ADD PLAYER WIN
+// =========================================================
+
 async function addPlayerWin() {
+
+    // -----------------------------------------------------
+    // CHECK SUPABASE
+    // -----------------------------------------------------
 
     if (!supabaseClient) {
 
         console.error(
-            'Supabase client is not available.'
+            '❌ Supabase client tidak tersedia.'
         )
 
         return false
     }
 
+
+    // -----------------------------------------------------
+    // GET USERNAME
+    // -----------------------------------------------------
 
     const username =
         String(
@@ -4819,60 +4828,85 @@ async function addPlayerWin() {
     if (!username) {
 
         console.error(
-            'Cannot add win: username is empty.'
+            '❌ Username kosong.'
         )
 
         return false
     }
 
 
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.rpc(
-                'add_player_win',
-                {
-                    player_name:
-                        username
-                }
-            )
+    console.log(
+        '🏆 Menambahkan WIN untuk:',
+        username
+    )
 
 
-        if (error) {
+    // -----------------------------------------------------
+    // CALL SUPABASE RPC
+    // -----------------------------------------------------
 
-            console.error(
-                'Add player win RPC error:',
-                error
-            )
-
-            return false
-        }
-
-
-        console.log(
-            'Win added:',
-            username,
-            data
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            'add_player_win',
+            {
+                player_name:
+                    username
+            }
         )
 
 
-        await loadLeaderboard()
+    // -----------------------------------------------------
+    // ERROR
+    // -----------------------------------------------------
 
-
-        return data === true
-
-    } catch (error) {
+    if (error) {
 
         console.error(
-            'Add player win exception:',
+            '❌ RPC ADD WIN ERROR:',
             error
         )
 
         return false
     }
+
+
+    // -----------------------------------------------------
+    // SUCCESS
+    // -----------------------------------------------------
+
+    console.log(
+        '✅ RPC ADD WIN RESULT:',
+        data
+    )
+
+
+    if (data !== true) {
+
+        console.error(
+            '❌ RPC tidak mengembalikan TRUE.'
+        )
+
+        return false
+    }
+
+
+    // -----------------------------------------------------
+    // REFRESH LEADERBOARD
+    // -----------------------------------------------------
+
+    await loadLeaderboard()
+
+
+    console.log(
+        '✅ WIN BERHASIL DITAMBAHKAN:',
+        username
+    )
+
+
+    return true
 }
 // =========================================================
 // TEST SUPABASE
