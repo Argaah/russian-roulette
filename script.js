@@ -5145,13 +5145,27 @@ function renderLeaderboard(data) {
 //
 // Win harus diproses oleh Edge Function.
 // =========================================================
-
 async function addPlayerWin() {
+
+    console.log(
+        'addPlayerWin: sending win request...'
+    )
+
+    console.log(
+        'playerUsername:',
+        playerUsername
+    )
+
+    console.log(
+        'gameSessionId:',
+        gameSessionId
+    )
+
 
     if (!supabaseClient) {
 
         console.error(
-            'addPlayerWin: Supabase client unavailable.'
+            'Supabase client tidak tersedia.'
         )
 
         return false
@@ -5161,84 +5175,92 @@ async function addPlayerWin() {
     if (!playerUsername) {
 
         console.error(
-            'addPlayerWin: playerUsername is empty.'
+            'playerUsername kosong.'
         )
 
         return false
     }
 
 
-    const username =
-        String(
-            playerUsername
-        ).trim()
-
-
-    if (!username) {
+    if (!gameSessionId) {
 
         console.error(
-            'addPlayerWin: invalid username.'
+            'gameSessionId kosong.'
         )
 
         return false
     }
-
-
-    console.log(
-        'addPlayerWin: sending win request...'
-    )
 
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const response =
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
                     body: {
+
                         player_name:
-                            username
+                            playerUsername,
+
+                        game_session_id:
+                            gameSessionId
+
                     }
                 }
             )
 
 
-        if (error) {
-
-            console.error(
-                'addPlayerWin Edge Function error:',
-                error
-            )
-
-            return false
-        }
-
-
         console.log(
-            'addPlayerWin response:',
-            data
+            'EDGE FUNCTION RESPONSE:',
+            response
         )
 
 
-        if (
-            !data ||
-            data.success !== true
-        ) {
+        const {
+            data,
+            error
+        } = response
+
+
+        if (error) {
 
             console.error(
-                'addPlayerWin rejected:',
-                data
+                'Edge Function ERROR:',
+                error
             )
+
+
+            if (error.context) {
+
+                try {
+
+                    const errorBody =
+                        await error.context.text()
+
+
+                    console.error(
+                        'EDGE FUNCTION ERROR BODY:',
+                        errorBody
+                    )
+
+                } catch (readError) {
+
+                    console.error(
+                        'Tidak bisa membaca error body:',
+                        readError
+                    )
+                }
+            }
+
 
             return false
         }
 
 
         console.log(
-            'WIN SAVED SUCCESSFULLY'
+            'EDGE FUNCTION SUCCESS:',
+            data
         )
 
 
@@ -5255,7 +5277,6 @@ async function addPlayerWin() {
         return false
     }
 }
-
 
 // =========================================================
 // TEST SUPABASE
