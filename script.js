@@ -55,12 +55,11 @@ if (
 // untuk session keamanan.
 //
 
-let gameSessionId = null
+// =========================================================
+// GAME SESSION
+// =========================================================
 
-let currentGameSessionId =
-null
-
-
+var gameSessionId = null
 // =========================================================
 // DOM HELPER
 // =========================================================
@@ -2944,13 +2943,27 @@ async function playerWonGame() {
 // =========================================================
 
 
+// =========================================================
+// ADD PLAYER WIN
+// =========================================================
+
 async function addPlayerWin() {
 
-    console.log('=================================')
-    console.log('ADD PLAYER WIN')
-    console.log('playerUsername:', playerUsername)
-    console.log('gameSessionId:', gameSessionId)
-    console.log('=================================')
+    console.log(
+        '========== ADD PLAYER WIN =========='
+    )
+
+
+    console.log(
+        'Player:',
+        playerUsername
+    )
+
+
+    console.log(
+        'Session:',
+        gameSessionId
+    )
 
 
     if (!supabaseClient) {
@@ -2963,20 +2976,10 @@ async function addPlayerWin() {
     }
 
 
-    if (!playerUsername) {
-
-        console.error(
-            'playerUsername kosong.'
-        )
-
-        return false
-    }
-
-
     if (!gameSessionId) {
 
         console.error(
-            'gameSessionId tidak tersedia.'
+            'gameSessionId belum tersedia.'
         )
 
         return false
@@ -2992,41 +2995,26 @@ async function addPlayerWin() {
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
-
                     body: {
 
-                        player_name:
-                            playerUsername,
-
-                        game_session_id:
-                            gameSessionId
-
-                    },
-
-                    headers: {
-
-                        'x-game-session':
+                        session_id:
                             gameSessionId
 
                     }
-
                 }
             )
 
 
         console.log(
-            'EDGE FUNCTION RESULT:',
-            {
-                data,
-                error
-            }
+            'ADD PLAYER WIN RESPONSE:',
+            data
         )
 
 
         if (error) {
 
             console.error(
-                'EDGE FUNCTION ERROR:',
+                'ADD PLAYER WIN ERROR:',
                 error
             )
 
@@ -3038,20 +3026,19 @@ async function addPlayerWin() {
                     const body =
                         await error.context.text()
 
+
                     console.error(
-                        'EDGE FUNCTION ERROR BODY:',
+                        'EDGE FUNCTION BODY:',
                         body
                     )
 
-                } catch (readError) {
+                } catch (e) {
 
                     console.error(
-                        'Tidak bisa membaca error body:',
-                        readError
+                        'Gagal membaca error body:',
+                        e
                     )
-
                 }
-
             }
 
 
@@ -3059,9 +3046,22 @@ async function addPlayerWin() {
         }
 
 
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            console.error(
+                'WIN DITOLAK:',
+                data
+            )
+
+            return false
+        }
+
+
         console.log(
-            'WIN SUCCESS:',
-            data
+            '✅ WIN BERHASIL DITAMBAHKAN'
         )
 
 
@@ -3073,15 +3073,14 @@ async function addPlayerWin() {
     } catch (error) {
 
         console.error(
-            'addPlayerWin exception:',
+            'ADD PLAYER WIN EXCEPTION:',
             error
         )
 
+
         return false
     }
-
 }
-
 
 
 
@@ -4760,7 +4759,11 @@ function validateUsername(username) {
 // PLAY FROM WELCOME
 // =========================================================
 
-function playFromWelcome() {
+// =========================================================
+// PLAY FROM WELCOME
+// =========================================================
+
+async function playFromWelcome() {
 
     if (gameStarted)
         return
@@ -4769,8 +4772,12 @@ function playFromWelcome() {
     hideWelcomeError()
 
 
+    // =====================================================
+    // AMBIL USERNAME
+    // =====================================================
+
     let username =
-        playerUsername
+        playerUsername || ''
 
 
     if (welcomeUsernameInput) {
@@ -4780,16 +4787,20 @@ function playFromWelcome() {
     }
 
 
-    const result =
+    // =====================================================
+    // VALIDASI USERNAME
+    // =====================================================
+
+    const validation =
         validateUsername(
             username
         )
 
 
-    if (!result.valid) {
+    if (!validation.valid) {
 
         showWelcomeError(
-            result.message
+            validation.message
         )
 
 
@@ -4797,19 +4808,21 @@ function playFromWelcome() {
 
             welcomeUsernameInput.focus()
 
-
             welcomeUsernameInput.classList.add(
                 'input-error'
             )
 
 
-            setTimeout(() => {
+            setTimeout(
+                () => {
 
-                welcomeUsernameInput.classList.remove(
-                    'input-error'
-                )
+                    welcomeUsernameInput.classList.remove(
+                        'input-error'
+                    )
 
-            }, 500)
+                },
+                500
+            )
         }
 
 
@@ -4817,8 +4830,12 @@ function playFromWelcome() {
     }
 
 
+    // =====================================================
+    // SIMPAN USERNAME
+    // =====================================================
+
     setPlayerUsername(
-        result.username
+        validation.username
     )
 
 
@@ -4838,12 +4855,120 @@ function playFromWelcome() {
     )
 
 
+    console.log(
+        'PLAYER:',
+        playerUsername
+    )
+
+
     // =====================================================
-    // AUDIO
+    // CREATE SERVER GAME SESSION
+    // =====================================================
+
+    if (!supabaseClient) {
+
+        console.error(
+            'Supabase client tidak tersedia.'
+        )
+
+        showWelcomeError(
+            'Supabase is unavailable.'
+        )
+
+        return
+    }
+
+
+    console.log(
+        'Creating game session...'
+    )
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.functions.invoke(
+            'start-game',
+            {
+                body: {
+
+                    player_name:
+                        playerUsername
+
+                }
+            }
+        )
+
+
+    console.log(
+        'START GAME RESPONSE:',
+        data
+    )
+
+
+    if (error) {
+
+        console.error(
+            'START GAME ERROR:',
+            error
+        )
+
+
+        showWelcomeError(
+            'Failed to start game. Please try again.'
+        )
+
+
+        return
+    }
+
+
+    if (
+        !data ||
+        !data.success ||
+        !data.session_id
+    ) {
+
+        console.error(
+            'Invalid start-game response:',
+            data
+        )
+
+
+        showWelcomeError(
+            'Game session could not be created.'
+        )
+
+
+        return
+    }
+
+
+    // =====================================================
+    // SAVE SERVER SESSION
+    // =====================================================
+
+    gameSessionId =
+        data.session_id
+
+
+    console.log(
+        'GAME SESSION CREATED:',
+        gameSessionId
+    )
+
+
+    // =====================================================
+    // START AUDIO
     // =====================================================
 
     startGameSounds()
 
+
+    // =====================================================
+    // HIDE WELCOME
+    // =====================================================
 
     hideWelcomeScreen()
 
@@ -4853,8 +4978,12 @@ function playFromWelcome() {
     // =====================================================
 
     startGame()
-}
 
+
+    console.log(
+        'GAME STARTED'
+    )
+}
 
 // =========================================================
 // WELCOME PLAY BUTTON
@@ -5164,138 +5293,7 @@ function renderLeaderboard(data) {
 //
 // Win harus diproses oleh Edge Function.
 // =========================================================
-async function addPlayerWin() {
 
-    console.log(
-        'addPlayerWin: sending win request...'
-    )
-
-    console.log(
-        'playerUsername:',
-        playerUsername
-    )
-
-    console.log(
-        'gameSessionId:',
-        gameSessionId
-    )
-
-
-    if (!supabaseClient) {
-
-        console.error(
-            'Supabase client tidak tersedia.'
-        )
-
-        return false
-    }
-
-
-    if (!playerUsername) {
-
-        console.error(
-            'playerUsername kosong.'
-        )
-
-        return false
-    }
-
-
-    if (!gameSessionId) {
-
-        console.error(
-            'gameSessionId kosong.'
-        )
-
-        return false
-    }
-
-
-    try {
-
-        const response =
-            await supabaseClient.functions.invoke(
-                'add-player-win',
-                {
-                    body: {
-
-                        player_name:
-                            playerUsername,
-
-                        game_session_id:
-                            gameSessionId
-
-                    }
-                }
-            )
-
-
-        console.log(
-            'EDGE FUNCTION RESPONSE:',
-            response
-        )
-
-
-        const {
-            data,
-            error
-        } = response
-
-
-        if (error) {
-
-            console.error(
-                'Edge Function ERROR:',
-                error
-            )
-
-
-            if (error.context) {
-
-                try {
-
-                    const errorBody =
-                        await error.context.text()
-
-
-                    console.error(
-                        'EDGE FUNCTION ERROR BODY:',
-                        errorBody
-                    )
-
-                } catch (readError) {
-
-                    console.error(
-                        'Tidak bisa membaca error body:',
-                        readError
-                    )
-                }
-            }
-
-
-            return false
-        }
-
-
-        console.log(
-            'EDGE FUNCTION SUCCESS:',
-            data
-        )
-
-
-        return true
-
-    } catch (error) {
-
-        console.error(
-            'addPlayerWin exception:',
-            error
-        )
-
-
-        return false
-    }
-}
 
 // =========================================================
 // TEST SUPABASE
