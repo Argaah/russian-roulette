@@ -3632,19 +3632,19 @@ async function playerWonGame() {
 const winSaved =
     await addPlayerWin()
 
-
 console.log(
-    '🏆 WIN SAVED:',
+    'Win saved:',
     winSaved
 )
 
 
-// =====================================================
-// AMBIL TOTAL WIN TERBARU
-// =====================================================
-
 const currentWins =
     await getPlayerWins()
+
+console.log(
+    'Current wins:',
+    currentWins
+)
 
 
 console.log(
@@ -4801,23 +4801,15 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
-    // -----------------------------------------------------
-    // CHECK SUPABASE
-    // -----------------------------------------------------
-
     if (!supabaseClient) {
 
         console.error(
-            '❌ Supabase client tidak tersedia.'
+            'Supabase client is not available.'
         )
 
         return false
     }
 
-
-    // -----------------------------------------------------
-    // GET USERNAME
-    // -----------------------------------------------------
 
     const username =
         String(
@@ -4828,85 +4820,57 @@ async function addPlayerWin() {
     if (!username) {
 
         console.error(
-            '❌ Username kosong.'
+            'Player username is empty.'
         )
 
         return false
     }
 
 
-    console.log(
-        '🏆 Menambahkan WIN untuk:',
-        username
-    )
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.rpc(
+                'add_player_win',
+                {
+                    player_name:
+                        username
+                }
+            )
 
 
-    // -----------------------------------------------------
-    // CALL SUPABASE RPC
-    // -----------------------------------------------------
+        if (error) {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.rpc(
-            'add_player_win',
-            {
-                player_name:
-                    username
-            }
+            console.error(
+                'RPC add_player_win error:',
+                error
+            )
+
+            return false
+        }
+
+
+        console.log(
+            'WIN ADDED:',
+            username,
+            data
         )
 
 
-    // -----------------------------------------------------
-    // ERROR
-    // -----------------------------------------------------
+        return true
 
-    if (error) {
+    } catch (error) {
 
         console.error(
-            '❌ RPC ADD WIN ERROR:',
+            'addPlayerWin exception:',
             error
         )
 
         return false
     }
-
-
-    // -----------------------------------------------------
-    // SUCCESS
-    // -----------------------------------------------------
-
-    console.log(
-        '✅ RPC ADD WIN RESULT:',
-        data
-    )
-
-
-    if (data !== true) {
-
-        console.error(
-            '❌ RPC tidak mengembalikan TRUE.'
-        )
-
-        return false
-    }
-
-
-    // -----------------------------------------------------
-    // REFRESH LEADERBOARD
-    // -----------------------------------------------------
-
-    await loadLeaderboard()
-
-
-    console.log(
-        '✅ WIN BERHASIL DITAMBAHKAN:',
-        username
-    )
-
-
-    return true
 }
 // =========================================================
 // TEST SUPABASE
