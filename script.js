@@ -4839,25 +4839,53 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
-    if (!supabaseClient)
-        return false
+    console.log('========== ADD PLAYER WIN ==========')
 
-    if (!playerUsername)
-        return false
+    console.log(
+        'Username:',
+        playerUsername
+    )
 
-    if (!currentGameSessionId)
+    console.log(
+        'Game Session:',
+        currentGameSessionId
+    )
+
+    if (!supabaseClient) {
+
+        console.error(
+            '❌ supabaseClient tidak ada'
+        )
+
         return false
+    }
+
+    if (!playerUsername) {
+
+        console.error(
+            '❌ playerUsername kosong'
+        )
+
+        return false
+    }
+
+    if (!currentGameSessionId) {
+
+        console.error(
+            '❌ currentGameSessionId kosong'
+        )
+
+        return false
+    }
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const response =
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
                     body: {
+
                         player_name:
                             playerUsername,
 
@@ -4867,10 +4895,20 @@ async function addPlayerWin() {
                 }
             )
 
+        console.log(
+            'Edge Function response:',
+            response
+        )
+
+        const {
+            data,
+            error
+        } = response
+
         if (error) {
 
             console.error(
-                'Add player win error:',
+                '❌ Edge Function ERROR:',
                 error
             )
 
@@ -4878,17 +4916,17 @@ async function addPlayerWin() {
         }
 
         console.log(
-            'Win successfully registered:',
+            '✅ WIN BERHASIL:',
             data
         )
 
         return true
 
-    } catch (err) {
+    } catch (error) {
 
         console.error(
-            'Add player win exception:',
-            err
+            '❌ EXCEPTION:',
+            error
         )
 
         return false
@@ -5211,6 +5249,7 @@ window.addEventListener(
 
 function startGame() {
 
+    
     // Buat session baru setiap game
     createGameSession()
 
