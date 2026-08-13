@@ -497,7 +497,6 @@ function randomResult() {
 
     updateChamberUI()
 
-    console.log('CHAMBER USED:', currentChamber, '/', MAX_CHAMBERS)
 
     return result
 }
@@ -1415,7 +1414,6 @@ async function playerWonGame() {
     stopGameSounds()
     stopEnemyTaunts()
 
-    console.log('PLAYER WON')
 
     // =====================================================
     // SAVE WIN THROUGH EDGE FUNCTION
@@ -1423,7 +1421,6 @@ async function playerWonGame() {
 
     const winSaved = await addPlayerWin()
 
-    console.log('WIN SAVED:', winSaved)
 
     // =====================================================
     // GET UPDATED WINS
@@ -1431,7 +1428,6 @@ async function playerWonGame() {
 
     const currentWins = await getPlayerWins()
 
-    console.log('CURRENT WINS:', currentWins)
 
     // =====================================================
     // DEATH VISUAL
@@ -1641,7 +1637,6 @@ async function startGameFromExistingLogin() {
         return
     }
 
-    console.log('Creating new server game session...')
 
     const { data, error } = await supabaseClient.functions.invoke(
         'start-game',
@@ -1674,7 +1669,6 @@ async function startGameFromExistingLogin() {
 
     gameSessionId = data.session_id
 
-    console.log('NEW GAME SESSION:', gameSessionId)
 
     startGameSounds()
     startGame()
@@ -1910,7 +1904,6 @@ async function playFromWelcome() {
         return
     }
 
-    console.log('PLAYER:', playerUsername)
 
     // =====================================================
     // START AUDIO IMMEDIATELY FROM USER CLICK
@@ -1929,7 +1922,6 @@ async function playFromWelcome() {
         return
     }
 
-    console.log('Creating server game session...')
 
     try {
         const { data, error } = await supabaseClient.functions.invoke(
@@ -1941,7 +1933,6 @@ async function playFromWelcome() {
             }
         )
 
-        console.log('START GAME RESPONSE:', data)
 
         if (error) {
             console.error('START GAME ERROR:', error)
@@ -1976,7 +1967,6 @@ async function playFromWelcome() {
 
         gameSessionId = data.session_id
 
-        console.log('GAME SESSION CREATED:', gameSessionId)
 
         // =================================================
         // ENTER GAME
@@ -1985,7 +1975,6 @@ async function playFromWelcome() {
         hideWelcomeScreen()
         startGame()
 
-        console.log('GAME STARTED')
     } catch (error) {
         console.error('START GAME EXCEPTION:', error)
 
@@ -2213,8 +2202,6 @@ function renderLeaderboard(data) {
 // =========================================================
 
 async function addPlayerWin() {
-    console.log('========== ADD PLAYER WIN ==========')
-    console.log('GAME SESSION:', window.gameSessionId)
 
     if (!supabaseClient) {
         console.error('Supabase client tidak tersedia.')
@@ -2237,7 +2224,6 @@ async function addPlayerWin() {
             }
         )
 
-        console.log('ADD-PLAYER-WIN RESPONSE:', data)
 
         if (error) {
             console.error('ADD-PLAYER-WIN ERROR:', error)
@@ -2261,7 +2247,6 @@ async function addPlayerWin() {
             return false
         }
 
-        console.log('✅ WIN BERHASIL DITAMBAHKAN')
 
         await loadLeaderboard()
 
@@ -2294,8 +2279,6 @@ async function testSupabase() {
             return
         }
 
-        console.log('Supabase connected.')
-        console.log('Leaderboard:', data)
     } catch (error) {
         console.error('Supabase test exception:', error)
     }
@@ -2520,5 +2503,3 @@ testSupabase()
 // =========================================================
 // DEBUG SESSION
 // =========================================================
-
-console.log('gameSessionId initialized:', gameSessionId)
