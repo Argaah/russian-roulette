@@ -4,6 +4,7 @@
 // PART 1 / 2
 // =========================================================
 
+let gameSessionId = null
 
 // =========================================================
 // SUPABASE
@@ -578,8 +579,7 @@ function playRandomEnemyLaugh() {
 
 function startGameSounds() {
 
-    gameSessionId =
-    crypto.randomUUID()
+    gameSessionId = crypto.randomUUID()
 
 console.log(
     'New game session:',
@@ -2950,9 +2950,6 @@ async function playerWonGame() {
 // ADD PLAYER WIN
 // =========================================================
 
-// =========================================================
-// ADD PLAYER WIN
-// =========================================================
 
 async function addPlayerWin() {
 
@@ -2986,7 +2983,7 @@ async function addPlayerWin() {
     if (!gameSessionId) {
 
         console.error(
-            'gameSessionId kosong.'
+            'gameSessionId tidak tersedia.'
         )
 
         return false
@@ -2995,7 +2992,10 @@ async function addPlayerWin() {
 
     try {
 
-        const result =
+        const {
+            data,
+            error
+        } =
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
@@ -3023,14 +3023,11 @@ async function addPlayerWin() {
 
         console.log(
             'EDGE FUNCTION RESULT:',
-            result
+            {
+                data,
+                error
+            }
         )
-
-
-        const {
-            data,
-            error
-        } = result
 
 
         if (error) {
@@ -3045,24 +3042,19 @@ async function addPlayerWin() {
 
                 try {
 
-                    const response =
-                        error.context
-
-
                     const body =
-                        await response.text()
-
+                        await error.context.text()
 
                     console.error(
                         'EDGE FUNCTION ERROR BODY:',
                         body
                     )
 
-                } catch (e) {
+                } catch (readError) {
 
                     console.error(
-                        'Gagal membaca response:',
-                        e
+                        'Tidak bisa membaca error body:',
+                        readError
                     )
 
                 }
@@ -3080,12 +3072,15 @@ async function addPlayerWin() {
         )
 
 
+        await loadLeaderboard()
+
+
         return true
 
     } catch (error) {
 
         console.error(
-            'addPlayerWin CRASH:',
+            'addPlayerWin exception:',
             error
         )
 
@@ -3093,6 +3088,8 @@ async function addPlayerWin() {
     }
 
 }
+
+
 
 
 
