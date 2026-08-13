@@ -4,7 +4,18 @@
 // PART 1 / 2
 // =========================================================
 
-let gameSessionId = null
+// =========================================================
+// GAME SESSION
+// =========================================================
+
+let currentGameSessionId = null
+
+function createGameSession() {
+    currentGameSessionId =
+        crypto.randomUUID()
+
+    return currentGameSessionId
+}
 
 // =========================================================
 // SUPABASE
@@ -4828,52 +4839,60 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
-    console.log('========== ADD PLAYER WIN ==========')
-    console.log('gameSessionId:', gameSessionId)
-
-    if (!gameSessionId) {
-        console.error('❌ gameSessionId KOSONG')
+    if (!supabaseClient)
         return false
-    }
 
-    console.log('Mengirim session ke Edge Function...')
+    if (!playerUsername)
+        return false
 
-    const {
-        data,
-        error
-    } = await supabaseClient.functions.invoke(
-        'add-player-win',
-        {
-            body: {
-                session_id: gameSessionId
-            }
-        }
-    )
+    if (!currentGameSessionId)
+        return false
 
-    console.log('Edge Function data:', data)
-    console.log('Edge Function error:', error)
+    try {
 
-    if (error) {
-        console.error(
-            '❌ EDGE FUNCTION ERROR:',
+        const {
+            data,
             error
+        } =
+            await supabaseClient.functions.invoke(
+                'add-player-win',
+                {
+                    body: {
+                        player_name:
+                            playerUsername,
+
+                        game_session_id:
+                            currentGameSessionId
+                    }
+                }
+            )
+
+        if (error) {
+
+            console.error(
+                'Add player win error:',
+                error
+            )
+
+            return false
+        }
+
+        console.log(
+            'Win successfully registered:',
+            data
         )
 
-        return false
-    }
+        return true
 
-    if (!data?.success) {
+    } catch (err) {
+
         console.error(
-            '❌ WIN DITOLAK:',
-            data?.error
+            'Add player win exception:',
+            err
         )
 
         return false
     }
-
-    console.log('✅ WIN BERHASIL DITAMBAHKAN')
-
-    return true
 }
 // =========================================================
 // TEST SUPABASE
@@ -5192,113 +5211,47 @@ window.addEventListener(
 
 function startGame() {
 
-    stopEnemyTaunts()
-    
-    gameStarted =
-        true
+    // Buat session baru setiap game
+    createGameSession()
 
+    gameStarted = true
+    gameOver = false
 
-    gameOver =
-        false
+    gunHolder = null
+    playerCoinGuess = null
+    coinAlreadyFlipped = false
+    actionLocked = false
 
+    currentRound = 1
+    currentChamber = 0
 
-    gunHolder =
-        null
-
-
-    playerCoinGuess =
-        null
-
-
-    coinAlreadyFlipped =
-        false
-
-
-    actionLocked =
-        false
-
-
-    currentRound =
-        1
-
-
-    currentChamber =
-        0
-
-
-    playerShuffleCount =
-        0
-
-
-    enemyShuffleCount =
-        0
-
-
-    // =====================================================
-    // RESET VISUAL
-    // =====================================================
+    playerShuffleCount = 0
+    enemyShuffleCount = 0
 
     resetVisualState()
-
-
-    // =====================================================
-    // CREATE ROUND
-    // =====================================================
-
     createNewRound()
 
-
     setCoinDown()
-
-
     hidePlayerActions()
-
-
     showCoinUI()
 
-
     if (turnInfo) {
-
-        turnInfo.textContent =
-            'COIN FLIP'
-
-        turnInfo.style.color =
-            '#e7c87a'
+        turnInfo.textContent = 'COIN FLIP'
+        turnInfo.style.color = '#e7c87a'
     }
 
-
     if (actionInfo) {
-
         actionInfo.textContent =
             'Choose HEADS or TAILS'
     }
-
 
     setEnemyAction(
         'Waiting for the coin...'
     )
 
-
     updateChamberUI()
-
-
     updatePlayerButtons()
-
-    // =====================================================
-// START ENEMY TAUNT
-// =====================================================
-
-setTimeout(() => {
-
-    if (!gameOver) {
-
-        startEnemyTaunts()
-
-    }
-
-}, 2000)
 }
-
 
 // =========================================================
 // GLOBAL FUNCTIONS
