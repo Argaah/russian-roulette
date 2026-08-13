@@ -56,10 +56,10 @@ if (
 //
 
 // =========================================================
-// GAME SESSION
+// GLOBAL GAME SESSION
 // =========================================================
 
-var gameSessionId = null
+window.gameSessionId = null
 // =========================================================
 // DOM HELPER
 // =========================================================
@@ -2937,12 +2937,6 @@ async function playerWonGame() {
 //
 // =========================================================
 
-
-// =========================================================
-// ADD PLAYER WIN
-// =========================================================
-
-
 // =========================================================
 // ADD PLAYER WIN
 // =========================================================
@@ -2955,14 +2949,8 @@ async function addPlayerWin() {
 
 
     console.log(
-        'Player:',
-        playerUsername
-    )
-
-
-    console.log(
-        'Session:',
-        gameSessionId
+        'GAME SESSION:',
+        window.gameSessionId
     )
 
 
@@ -2976,10 +2964,10 @@ async function addPlayerWin() {
     }
 
 
-    if (!gameSessionId) {
+    if (!window.gameSessionId) {
 
         console.error(
-            'gameSessionId belum tersedia.'
+            'GAME SESSION TIDAK ADA'
         )
 
         return false
@@ -2996,17 +2984,15 @@ async function addPlayerWin() {
                 'add-player-win',
                 {
                     body: {
-
                         session_id:
-                            gameSessionId
-
+                            window.gameSessionId
                     }
                 }
             )
 
 
         console.log(
-            'ADD PLAYER WIN RESPONSE:',
+            'ADD-PLAYER-WIN RESPONSE:',
             data
         )
 
@@ -3014,33 +3000,27 @@ async function addPlayerWin() {
         if (error) {
 
             console.error(
-                'ADD PLAYER WIN ERROR:',
+                'ADD-PLAYER-WIN ERROR:',
                 error
             )
-
 
             if (error.context) {
 
                 try {
 
-                    const body =
-                        await error.context.text()
-
-
                     console.error(
-                        'EDGE FUNCTION BODY:',
-                        body
+                        'ERROR BODY:',
+                        await error.context.text()
                     )
 
                 } catch (e) {
 
                     console.error(
-                        'Gagal membaca error body:',
+                        'Tidak bisa membaca error body:',
                         e
                     )
                 }
             }
-
 
             return false
         }
@@ -3076,7 +3056,6 @@ async function addPlayerWin() {
             'ADD PLAYER WIN EXCEPTION:',
             error
         )
-
 
         return false
     }
@@ -3326,8 +3305,7 @@ function restartGame() {
 
 
     // Session lama harus selalu dibuang.
-    currentGameSessionId =
-        null
+  
 
 
     startGame()
@@ -4754,11 +4732,6 @@ function validateUsername(username) {
     }
 }
 
-
-// =========================================================
-// PLAY FROM WELCOME
-// =========================================================
-
 // =========================================================
 // PLAY FROM WELCOME
 // =========================================================
@@ -4773,7 +4746,7 @@ async function playFromWelcome() {
 
 
     // =====================================================
-    // AMBIL USERNAME
+    // GET USERNAME
     // =====================================================
 
     let username =
@@ -4787,10 +4760,6 @@ async function playFromWelcome() {
     }
 
 
-    // =====================================================
-    // VALIDASI USERNAME
-    // =====================================================
-
     const validation =
         validateUsername(
             username
@@ -4803,7 +4772,6 @@ async function playFromWelcome() {
             validation.message
         )
 
-
         if (welcomeUsernameInput) {
 
             welcomeUsernameInput.focus()
@@ -4812,26 +4780,21 @@ async function playFromWelcome() {
                 'input-error'
             )
 
+            setTimeout(() => {
 
-            setTimeout(
-                () => {
+                welcomeUsernameInput.classList.remove(
+                    'input-error'
+                )
 
-                    welcomeUsernameInput.classList.remove(
-                        'input-error'
-                    )
-
-                },
-                500
-            )
+            }, 500)
         }
-
 
         return
     }
 
 
     // =====================================================
-    // SIMPAN USERNAME
+    // SAVE USERNAME
     // =====================================================
 
     setPlayerUsername(
@@ -4848,7 +4811,6 @@ async function playFromWelcome() {
         'true'
     )
 
-
     localStorage.setItem(
         'playerHasLoggedIn',
         'true'
@@ -4862,7 +4824,7 @@ async function playFromWelcome() {
 
 
     // =====================================================
-    // CREATE SERVER GAME SESSION
+    // CREATE SERVER SESSION
     // =====================================================
 
     if (!supabaseClient) {
@@ -4880,7 +4842,7 @@ async function playFromWelcome() {
 
 
     console.log(
-        'Creating game session...'
+        'Creating server game session...'
     )
 
 
@@ -4892,17 +4854,15 @@ async function playFromWelcome() {
             'start-game',
             {
                 body: {
-
                     player_name:
                         playerUsername
-
                 }
             }
         )
 
 
     console.log(
-        'START GAME RESPONSE:',
+        'START-GAME RESPONSE:',
         data
     )
 
@@ -4910,15 +4870,13 @@ async function playFromWelcome() {
     if (error) {
 
         console.error(
-            'START GAME ERROR:',
+            'START-GAME ERROR:',
             error
         )
 
-
         showWelcomeError(
-            'Failed to start game. Please try again.'
+            'Failed to start game.'
         )
-
 
         return
     }
@@ -4931,15 +4889,13 @@ async function playFromWelcome() {
     ) {
 
         console.error(
-            'Invalid start-game response:',
+            'Invalid START-GAME response:',
             data
         )
 
-
         showWelcomeError(
-            'Game session could not be created.'
+            'Game session was not created.'
         )
-
 
         return
     }
@@ -4949,13 +4905,13 @@ async function playFromWelcome() {
     // SAVE SERVER SESSION
     // =====================================================
 
-    gameSessionId =
+    window.gameSessionId =
         data.session_id
 
 
     console.log(
         'GAME SESSION CREATED:',
-        gameSessionId
+        window.gameSessionId
     )
 
 
@@ -4978,11 +4934,6 @@ async function playFromWelcome() {
     // =====================================================
 
     startGame()
-
-
-    console.log(
-        'GAME STARTED'
-    )
 }
 
 // =========================================================
