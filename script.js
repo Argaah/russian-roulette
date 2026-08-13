@@ -3624,37 +3624,32 @@ async function playerWonGame() {
     stopEnemyTaunts()
 
 
- 
-    // =====================================================
-// SIMPAN WIN KE SUPABASE
-// =====================================================
+    // ==============================
+    // SAVE WIN TO SERVER
+    // ==============================
 
-const winSaved =
-    await addPlayerWin()
-
-console.log(
-    'Win saved:',
-    winSaved
-)
+    const winSaved =
+        await addPlayerWin()
 
 
-const currentWins =
-    await getPlayerWins()
+    // ==============================
+    // GET UPDATED WINS
+    // ==============================
 
-console.log(
-    'Current wins:',
-    currentWins
-)
+    const currentWins =
+        await getPlayerWins()
 
 
-console.log(
-    '🏆 CURRENT WINS:',
-    currentWins
-)
+    console.log(
+        'Win saved:',
+        winSaved
+    )
 
-    // =====================================================
-    // ENEMY DEATH
-    // =====================================================
+    console.log(
+        'Current wins:',
+        currentWins
+    )
+
 
     if (enemy) {
 
@@ -3680,12 +3675,11 @@ console.log(
     }
 
 
-    // =====================================================
-    // GAME OVER SCREEN
-    // =====================================================
-
     setTimeout(
         () => {
+
+            enemyHideGun()
+
 
             if (gameOverScreen) {
 
@@ -4793,38 +4787,23 @@ function renderLeaderboard(data) {
 
 // =========================================================
 // ADD PLAYER WIN
-// =========================================================
-
-// =========================================================
-// ADD PLAYER WIN
+// SERVER VERSION
 // =========================================================
 
 async function addPlayerWin() {
 
-    if (!supabaseClient) {
-
-        console.error(
-            'Supabase client is not available.'
-        )
-
+    if (!supabaseClient)
         return false
-    }
 
 
     const username =
         String(
-            playerUsername || ''
+            playerUsername ?? ''
         ).trim()
 
 
-    if (!username) {
-
-        console.error(
-            'Player username is empty.'
-        )
-
+    if (!username)
         return false
-    }
 
 
     try {
@@ -4833,11 +4812,13 @@ async function addPlayerWin() {
             data,
             error
         } =
-            await supabaseClient.rpc(
-                'add_player_win',
+            await supabaseClient.functions.invoke(
+                'add-player-win',
                 {
-                    player_name:
-                        username
+                    body: {
+                        player_name:
+                            username
+                    }
                 }
             )
 
@@ -4845,7 +4826,7 @@ async function addPlayerWin() {
         if (error) {
 
             console.error(
-                'RPC add_player_win error:',
+                'Add player win error:',
                 error
             )
 
@@ -4853,10 +4834,30 @@ async function addPlayerWin() {
         }
 
 
+        if (!data) {
+
+            console.error(
+                'No response from server.'
+            )
+
+            return false
+        }
+
+
+        if (!data.success) {
+
+            console.error(
+                'Server rejected win:',
+                data.error
+            )
+
+            return false
+        }
+
+
         console.log(
-            'WIN ADDED:',
-            username,
-            data
+            'WIN SAVED:',
+            data.wins
         )
 
 
@@ -4865,9 +4866,10 @@ async function addPlayerWin() {
     } catch (error) {
 
         console.error(
-            'addPlayerWin exception:',
+            'Add player win exception:',
             error
         )
+
 
         return false
     }
