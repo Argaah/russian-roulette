@@ -866,7 +866,6 @@
 
             const remainingBullets =
                 chambers
-                    .slice(currentChamber)
                     .filter(
                         value =>
                             value === 'bullet'
@@ -884,7 +883,6 @@
 
             const remainingBlanks =
                 chambers
-                    .slice(currentChamber)
                     .filter(
                         value =>
                             value === 'blank'
