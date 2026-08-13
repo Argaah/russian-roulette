@@ -55,6 +55,8 @@ if (
 // untuk session keamanan.
 //
 
+let gameSessionId = null
+
 let currentGameSessionId =
     null
 
@@ -575,6 +577,14 @@ function playRandomEnemyLaugh() {
 // =========================================================
 
 function startGameSounds() {
+
+    gameSessionId =
+    crypto.randomUUID()
+
+console.log(
+    'New game session:',
+    gameSessionId
+)
 
     if (gameSoundsStarted)
         return
@@ -2937,48 +2947,64 @@ async function playerWonGame() {
 
 async function addPlayerWin() {
 
+    console.log('=== ADD PLAYER WIN ===')
+
     console.log(
-        '========== ADD PLAYER WIN =========='
+        'Username:',
+        playerUsername
+    )
+
+    console.log(
+        'Game session:',
+        gameSessionId
     )
 
 
     if (!supabaseClient) {
 
         console.error(
-            '❌ Supabase client tidak tersedia.'
+            'Supabase client tidak tersedia.'
         )
 
         return false
     }
 
 
-    if (!currentGameSessionId) {
+    if (!playerUsername) {
 
         console.error(
-            '❌ Tidak ada currentGameSessionId.'
+            'playerUsername kosong.'
         )
 
         return false
     }
 
 
-    console.log(
-        'Sending session:',
-        currentGameSessionId
-    )
+    if (!gameSessionId) {
+
+        console.error(
+            'gameSessionId belum dibuat.'
+        )
+
+        return false
+    }
 
 
     try {
 
-        const response =
+        const {
+            data,
+            error
+        } =
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
                     body: {
+                        player_name:
+                            playerUsername,
 
-                        session_id:
-                            currentGameSessionId
-
+                        game_session_id:
+                            gameSessionId
                     }
                 }
             )
@@ -2986,21 +3012,14 @@ async function addPlayerWin() {
 
         console.log(
             'Edge Function response:',
-            response
+            data
         )
-
-
-        const {
-            data,
-            error
-        } =
-            response
 
 
         if (error) {
 
             console.error(
-                '❌ Edge Function ERROR:',
+                'Edge Function error:',
                 error
             )
 
@@ -3008,14 +3027,21 @@ async function addPlayerWin() {
         }
 
 
-        if (
-            !data ||
-            data.success !== true
-        ) {
+        if (!data) {
 
             console.error(
-                '❌ SERVER MENOLAK WIN:',
-                data
+                'Edge Function tidak mengembalikan data.'
+            )
+
+            return false
+        }
+
+
+        if (data.error) {
+
+            console.error(
+                'Server rejected win:',
+                data.error
             )
 
             return false
@@ -3023,16 +3049,8 @@ async function addPlayerWin() {
 
 
         console.log(
-            '✅ WIN BERHASIL DISIMPAN.'
+            'WIN BERHASIL DITAMBAHKAN'
         )
-
-
-        // Session jangan dipakai lagi.
-        currentGameSessionId =
-            null
-
-
-        await loadLeaderboard()
 
 
         return true
@@ -3040,7 +3058,7 @@ async function addPlayerWin() {
     } catch (error) {
 
         console.error(
-            '❌ ADD PLAYER WIN EXCEPTION:',
+            'addPlayerWin exception:',
             error
         )
 
@@ -3981,29 +3999,28 @@ async function playerWonGame() {
         return
 
 
-    gameOver = true
+    gameOver =
+        true
 
-    actionLocked = true
+    actionLocked =
+        true
 
 
     stopGameSounds()
     stopEnemyTaunts()
 
 
-    // =====================================================
-    // SAVE WIN
-    // =====================================================
+    console.log(
+        'PLAYER WON'
+    )
+
+
+    // =========================================
+    // SIMPAN WIN
+    // =========================================
 
     const winSaved =
         await addPlayerWin()
-
-
-    // =====================================================
-    // GET UPDATED WIN
-    // =====================================================
-
-    const currentWins =
-        await getPlayerWins()
 
 
     console.log(
@@ -4012,15 +4029,23 @@ async function playerWonGame() {
     )
 
 
+    // =========================================
+    // AMBIL TOTAL WIN TERBARU
+    // =========================================
+
+    const currentWins =
+        await getPlayerWins()
+
+
     console.log(
         'Current wins:',
         currentWins
     )
 
 
-    // =====================================================
-    // ENEMY DEATH
-    // =====================================================
+    // =========================================
+    // DEATH ANIMATION
+    // =========================================
 
     if (enemy) {
 
@@ -4046,76 +4071,73 @@ async function playerWonGame() {
     }
 
 
-    // =====================================================
-    // GAME OVER SCREEN
-    // =====================================================
+    setTimeout(
+        () => {
 
-    setTimeout(() => {
-
-        enemyHideGun()
+            enemyHideGun()
 
 
-        if (gameOverScreen) {
+            if (gameOverScreen) {
 
-            gameOverScreen.style.pointerEvents =
-                'auto'
+                gameOverScreen.style.pointerEvents =
+                    'auto'
 
-            gameOverScreen.style.opacity =
-                '1'
-
-            gameOverScreen.style.background =
-                'rgba(0, 0, 0, .88)'
-        }
-
-
-        if (gameOverTitle) {
-
-            gameOverTitle.textContent =
-                'Just Luck..'
-        }
-
-
-        if (newChallengerButton) {
-
-            newChallengerButton.style.display =
-                'block'
-        }
-
-
-        if (continueText) {
-
-            continueText.style.display =
-                'none'
-        }
-
-
-        if (winStats) {
-
-            winStats.textContent =
-                currentWins
-        }
-
-
-        if (gameOverContent) {
-
-            setTimeout(() => {
-
-                gameOverContent.style.opacity =
+                gameOverScreen.style.opacity =
                     '1'
 
-                gameOverContent.style.transform =
-                    'translateY(0) scale(1)'
-
-            }, 300)
-        }
+                gameOverScreen.style.background =
+                    'rgba(0, 0, 0, .88)'
+            }
 
 
-        // Refresh leaderboard
-        loadLeaderboard()
+            if (gameOverTitle) {
 
-    }, 800)
+                gameOverTitle.textContent =
+                    'Just Luck..'
+            }
+
+
+            if (newChallengerButton) {
+
+                newChallengerButton.style.display =
+                    'block'
+            }
+
+
+            if (continueText) {
+
+                continueText.style.display =
+                    'none'
+            }
+
+
+            if (winStats) {
+
+                winStats.textContent =
+                    currentWins
+            }
+
+
+            if (gameOverContent) {
+
+                setTimeout(
+                    () => {
+
+                        gameOverContent.style.opacity =
+                            '1'
+
+                        gameOverContent.style.transform =
+                            'translateY(0) scale(1)'
+
+                    },
+                    300
+                )
+            }
+
+        },
+        800
+    )
 }
-
 
 // =========================================================
 // GET PLAYER WINS
