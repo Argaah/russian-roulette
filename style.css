@@ -2079,11 +2079,12 @@ GAME OVER
 @media (max-width: 900px) {
 
     #leaderboard {
-        scale: 0.8;
+        scale: 0.6;
         position: absolute;
 
         left: 10px;
-        top: 50%;
+        top: 30%;
+        
 
         transform: none;
 
