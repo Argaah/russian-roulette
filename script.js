@@ -4240,31 +4240,23 @@
     }
 
 
-    // =====================================================
-    // PARALLAX
-    // =====================================================
+   // =====================================================
+// PARALLAX
+// =====================================================
 
-    let rect =
-        table
-            ? table.getBoundingClientRect()
-            : null
-
-
-    let parallaxX = 0
-
-    let parallaxY = 0
-
-    let parallaxRunning = false
-
-
-   // =========================================================
-// MOBILE PERFORMANCE PARALLAX
-// =========================================================
+// =====================================================
+// MOBILE DETECTION
+// =====================================================
 
 const isMobileDevice =
     window.matchMedia('(max-width: 768px)').matches ||
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0
+
+
+// =====================================================
+// PARALLAX STATE
+// =====================================================
 
 let rect =
     table
@@ -4276,26 +4268,33 @@ let parallaxY = 0
 let parallaxRunning = false
 
 
+// =====================================================
+// UPDATE PARALLAX
+// =====================================================
+
 function updateParallax() {
+
+    // =================================================
+    // MOBILE
+    // =================================================
+    //
+    // HP tidak menjalankan parallax.
+    // Ini menghilangkan pekerjaan backgroundPosition
+    // setiap frame ketika touch / scroll.
+    //
+
+    if (isMobileDevice)
+        return
+
 
     if (!rect)
         return
-
-    // ==========================================
-    // MOBILE
-    // ==========================================
-    // Jangan jalankan parallax berat di HP.
-    // Ini salah satu pengurangan beban terbesar.
-    if (isMobileDevice) {
-
-        return
-
-    }
 
 
     const centerX =
         rect.left +
         rect.width / 2
+
 
     const centerY =
         rect.top +
@@ -4316,86 +4315,37 @@ function updateParallax() {
         ) / centerY
 
 
-    // ==========================================
-    // DESKTOP ONLY
-    // ==========================================
+    // =================================================
+    // BACKGROUND
+    // =================================================
 
     if (background) {
 
         background.style.backgroundPosition =
-            `calc(50% + ${-posX * 20}px) calc(50% + ${-posY * 10}px)`
+            `calc(50% + ${-posX * 20}px) ` +
+            `calc(50% + ${-posY * 10}px)`
 
     }
+
+
+    // =================================================
+    // TABLE
+    // =================================================
 
     if (table) {
 
         table.style.backgroundPosition =
-            `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
-
-    }
-
-    if (playerGun) {
-
-        playerGun.style.backgroundPosition =
-            `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
-
-    }
-
-    if (playerGunShotHimself) {
-
-        playerGunShotHimself.style.backgroundPosition =
-            `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
-
-    }
-
-    if (coinDown) {
-
-        coinDown.style.backgroundPosition =
-            `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
-
-    }
-
-    if (coinHead) {
-
-        coinHead.style.backgroundPosition =
-            `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
-
-    }
-
-    if (coinTails) {
-
-        coinTails.style.backgroundPosition =
-            `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
-
-    }
-
-    if (enemy) {
-
-        enemy.style.backgroundPosition =
-            `calc(50% + ${-posX * 5}px) calc(50% + ${-posY * 2}px)`
-
-    }
-
-    if (enemyGunShotPlayer) {
-
-        enemyGunShotPlayer.style.backgroundPosition =
-            `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
-
-    }
-
-    if (enemyGunShotHimself) {
-
-        enemyGunShotHimself.style.backgroundPosition =
-            `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
+            `calc(50% + ${posX * 5}px) ` +
+            `calc(50% + ${posY * 2.5}px)`
 
     }
 
 }
 
 
-// =========================================================
+// =====================================================
 // RESIZE
-// =========================================================
+// =====================================================
 
 window.addEventListener(
     'resize',
@@ -4404,8 +4354,18 @@ window.addEventListener(
         if (!table)
             return
 
-        rect =
-            table.getBoundingClientRect()
+
+        // Update ukuran setelah browser
+        // selesai melakukan resize.
+
+        requestAnimationFrame(
+            () => {
+
+                rect =
+                    table.getBoundingClientRect()
+
+            }
+        )
 
     },
     {
@@ -4414,9 +4374,15 @@ window.addEventListener(
 )
 
 
-// =========================================================
-// DESKTOP MOUSE PARALLAX ONLY
-// =========================================================
+// =====================================================
+// DESKTOP MOUSE PARALLAX
+// =====================================================
+//
+// HANYA desktop.
+//
+// Mobile tidak menggunakan mousemove.
+// Mobile juga TIDAK menggunakan touchmove.
+//
 
 if (!isMobileDevice) {
 
@@ -4430,6 +4396,9 @@ if (!isMobileDevice) {
             parallaxY =
                 event.clientY
 
+
+            // Jangan menjalankan lebih dari
+            // satu requestAnimationFrame sekaligus.
 
             if (parallaxRunning)
                 return
@@ -4445,6 +4414,7 @@ if (!isMobileDevice) {
                     parallaxRunning =
                         false
 
+
                     updateParallax()
 
                 }
@@ -4457,7 +4427,6 @@ if (!isMobileDevice) {
     )
 
 }
-
     // =====================================================
     // INTERNAL EVENT LISTENERS
     // =====================================================
