@@ -4257,160 +4257,168 @@
     let parallaxRunning = false
 
 
-    function updateParallax() {
+   // =========================================================
+// MOBILE PERFORMANCE PARALLAX
+// =========================================================
 
-        if (!rect) {
-            return
-        }
+const isMobileDevice =
+    window.matchMedia('(max-width: 768px)').matches ||
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0
 
+let rect =
+    table
+        ? table.getBoundingClientRect()
+        : null
 
-        const isMobile =
-            window.innerWidth <= 768
-
-
-        const centerX =
-            isMobile
-                ? window.innerWidth / 2
-                : rect.left +
-                  rect.width / 2
-
-
-        const centerY =
-            isMobile
-                ? window.innerHeight / 2
-                : rect.top +
-                  rect.height / 2
+let parallaxX = 0
+let parallaxY = 0
+let parallaxRunning = false
 
 
-        const safeCenterX =
-            centerX || 1
+function updateParallax() {
 
+    if (!rect)
+        return
 
-        const safeCenterY =
-            centerY || 1
+    // ==========================================
+    // MOBILE
+    // ==========================================
+    // Jangan jalankan parallax berat di HP.
+    // Ini salah satu pengurangan beban terbesar.
+    if (isMobileDevice) {
 
-
-        const posX =
-            (
-                parallaxX -
-                safeCenterX
-            ) /
-            safeCenterX
-
-
-        const posY =
-            (
-                parallaxY -
-                safeCenterY
-            ) /
-            safeCenterY
-
-
-        if (background) {
-
-            background.style.backgroundPosition =
-                `calc(50% + ${-posX * 20}px) calc(50% + ${-posY * 10}px)`
-
-        }
-
-
-        if (table) {
-
-            table.style.backgroundPosition =
-                `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
-
-        }
-
-
-        if (playerGun) {
-
-            playerGun.style.backgroundPosition =
-                `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
-
-        }
-
-
-        if (playerGunShotHimself) {
-
-            playerGunShotHimself.style.backgroundPosition =
-                `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
-
-        }
-
-
-        if (coinDown) {
-
-            coinDown.style.backgroundPosition =
-                `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
-
-        }
-
-
-        if (coinHead) {
-
-            coinHead.style.backgroundPosition =
-                `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
-
-        }
-
-
-        if (coinTails) {
-
-            coinTails.style.backgroundPosition =
-                `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
-
-        }
-
-
-        if (enemy) {
-
-            enemy.style.backgroundPosition =
-                `calc(50% + ${-posX * 5}px) calc(50% + ${-posY * 2}px)`
-
-        }
-
-
-        if (enemyGunShotPlayer) {
-
-            enemyGunShotPlayer.style.backgroundPosition =
-                `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
-
-        }
-
-
-        if (enemyGunShotHimself) {
-
-            enemyGunShotHimself.style.backgroundPosition =
-                `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
-
-        }
+        return
 
     }
 
 
-    // =====================================================
-    // RESIZE
-    // =====================================================
+    const centerX =
+        rect.left +
+        rect.width / 2
 
-    window.addEventListener(
-        'resize',
-        () => {
-
-            if (!table) {
-                return
-            }
+    const centerY =
+        rect.top +
+        rect.height / 2
 
 
-            rect =
-                table.getBoundingClientRect()
+    const posX =
+        (
+            parallaxX -
+            centerX
+        ) / centerX
 
-        }
-    )
+
+    const posY =
+        (
+            parallaxY -
+            centerY
+        ) / centerY
 
 
-    // =====================================================
-    // MOUSE MOVE
-    // =====================================================
+    // ==========================================
+    // DESKTOP ONLY
+    // ==========================================
+
+    if (background) {
+
+        background.style.backgroundPosition =
+            `calc(50% + ${-posX * 20}px) calc(50% + ${-posY * 10}px)`
+
+    }
+
+    if (table) {
+
+        table.style.backgroundPosition =
+            `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
+
+    }
+
+    if (playerGun) {
+
+        playerGun.style.backgroundPosition =
+            `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
+
+    }
+
+    if (playerGunShotHimself) {
+
+        playerGunShotHimself.style.backgroundPosition =
+            `calc(50% + ${posX * 10}px) calc(50% + ${posY * 10}px)`
+
+    }
+
+    if (coinDown) {
+
+        coinDown.style.backgroundPosition =
+            `calc(50% + ${posX * 5}px) calc(50% + ${posY * 2.5}px)`
+
+    }
+
+    if (coinHead) {
+
+        coinHead.style.backgroundPosition =
+            `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
+
+    }
+
+    if (coinTails) {
+
+        coinTails.style.backgroundPosition =
+            `calc(50% + ${posX * 6}px) calc(50% + ${posY * 3}px)`
+
+    }
+
+    if (enemy) {
+
+        enemy.style.backgroundPosition =
+            `calc(50% + ${-posX * 5}px) calc(50% + ${-posY * 2}px)`
+
+    }
+
+    if (enemyGunShotPlayer) {
+
+        enemyGunShotPlayer.style.backgroundPosition =
+            `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
+
+    }
+
+    if (enemyGunShotHimself) {
+
+        enemyGunShotHimself.style.backgroundPosition =
+            `calc(50% + ${-posX * 1.5}px) calc(50% + ${-posY * 1.5}px)`
+
+    }
+
+}
+
+
+// =========================================================
+// RESIZE
+// =========================================================
+
+window.addEventListener(
+    'resize',
+    () => {
+
+        if (!table)
+            return
+
+        rect =
+            table.getBoundingClientRect()
+
+    },
+    {
+        passive: true
+    }
+)
+
+
+// =========================================================
+// DESKTOP MOUSE PARALLAX ONLY
+// =========================================================
+
+if (!isMobileDevice) {
 
     window.addEventListener(
         'mousemove',
@@ -4423,56 +4431,8 @@
                 event.clientY
 
 
-            if (parallaxRunning) {
+            if (parallaxRunning)
                 return
-            }
-
-
-            parallaxRunning =
-                true
-
-
-            requestAnimationFrame(
-                () => {
-
-                    parallaxRunning =
-                        false
-
-                    updateParallax()
-
-                }
-            )
-
-        }
-    )
-
-
-    // =====================================================
-    // TOUCH MOVE
-    // =====================================================
-
-    window.addEventListener(
-        'touchmove',
-        event => {
-
-            if (
-                !event.touches ||
-                !event.touches[0]
-            ) {
-                return
-            }
-
-
-            parallaxX =
-                event.touches[0].clientX
-
-            parallaxY =
-                event.touches[0].clientY
-
-
-            if (parallaxRunning) {
-                return
-            }
 
 
             parallaxRunning =
@@ -4496,6 +4456,7 @@
         }
     )
 
+}
 
     // =====================================================
     // INTERNAL EVENT LISTENERS
@@ -4661,5 +4622,4 @@
     testSupabase()
 
 
-    
 })()
