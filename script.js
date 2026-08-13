@@ -4828,57 +4828,50 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
+    console.log('========== ADD PLAYER WIN ==========')
+    console.log('gameSessionId:', gameSessionId)
+
     if (!gameSessionId) {
-
-        console.error(
-            'No game session'
-        )
-
+        console.error('❌ gameSessionId KOSONG')
         return false
     }
 
+    console.log('Mengirim session ke Edge Function...')
 
     const {
         data,
         error
-    } =
-        await supabaseClient.functions.invoke(
-            'add-player-win',
-            {
-                body: {
-                    session_id:
-                        gameSessionId
-                }
+    } = await supabaseClient.functions.invoke(
+        'add-player-win',
+        {
+            body: {
+                session_id: gameSessionId
             }
-        )
+        }
+    )
 
+    console.log('Edge Function data:', data)
+    console.log('Edge Function error:', error)
 
     if (error) {
-
         console.error(
-            'Add player win error:',
+            '❌ EDGE FUNCTION ERROR:',
             error
         )
 
         return false
     }
 
-
     if (!data?.success) {
-
         console.error(
-            'Win rejected:',
+            '❌ WIN DITOLAK:',
             data?.error
         )
 
         return false
     }
 
-
-    console.log(
-        'WIN SAVED'
-    )
-
+    console.log('✅ WIN BERHASIL DITAMBAHKAN')
 
     return true
 }
