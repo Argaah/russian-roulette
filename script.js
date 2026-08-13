@@ -2945,19 +2945,22 @@ async function playerWonGame() {
 //
 // =========================================================
 
+
+// =========================================================
+// ADD PLAYER WIN
+// =========================================================
+
+// =========================================================
+// ADD PLAYER WIN
+// =========================================================
+
 async function addPlayerWin() {
 
-    console.log('=== ADD PLAYER WIN ===')
-
-    console.log(
-        'Username:',
-        playerUsername
-    )
-
-    console.log(
-        'Game session:',
-        gameSessionId
-    )
+    console.log('=================================')
+    console.log('ADD PLAYER WIN')
+    console.log('playerUsername:', playerUsername)
+    console.log('gameSessionId:', gameSessionId)
+    console.log('=================================')
 
 
     if (!supabaseClient) {
@@ -2983,7 +2986,7 @@ async function addPlayerWin() {
     if (!gameSessionId) {
 
         console.error(
-            'gameSessionId belum dibuat.'
+            'gameSessionId kosong.'
         )
 
         return false
@@ -2992,64 +2995,88 @@ async function addPlayerWin() {
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const result =
             await supabaseClient.functions.invoke(
                 'add-player-win',
                 {
+
                     body: {
+
                         player_name:
                             playerUsername,
 
                         game_session_id:
                             gameSessionId
+
+                    },
+
+                    headers: {
+
+                        'x-game-session':
+                            gameSessionId
+
                     }
+
                 }
             )
 
 
         console.log(
-            'Edge Function response:',
-            data
+            'EDGE FUNCTION RESULT:',
+            result
         )
+
+
+        const {
+            data,
+            error
+        } = result
 
 
         if (error) {
 
             console.error(
-                'Edge Function error:',
+                'EDGE FUNCTION ERROR:',
                 error
             )
 
-            return false
-        }
+
+            if (error.context) {
+
+                try {
+
+                    const response =
+                        error.context
 
 
-        if (!data) {
-
-            console.error(
-                'Edge Function tidak mengembalikan data.'
-            )
-
-            return false
-        }
+                    const body =
+                        await response.text()
 
 
-        if (data.error) {
+                    console.error(
+                        'EDGE FUNCTION ERROR BODY:',
+                        body
+                    )
 
-            console.error(
-                'Server rejected win:',
-                data.error
-            )
+                } catch (e) {
+
+                    console.error(
+                        'Gagal membaca response:',
+                        e
+                    )
+
+                }
+
+            }
+
 
             return false
         }
 
 
         console.log(
-            'WIN BERHASIL DITAMBAHKAN'
+            'WIN SUCCESS:',
+            data
         )
 
 
@@ -3058,13 +3085,15 @@ async function addPlayerWin() {
     } catch (error) {
 
         console.error(
-            'addPlayerWin exception:',
+            'addPlayerWin CRASH:',
             error
         )
 
         return false
     }
+
 }
+
 
 
 // =========================================================
