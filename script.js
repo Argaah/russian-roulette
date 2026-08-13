@@ -583,10 +583,44 @@ function hideWelcomeScreen() {
 // PLAY FROM WELCOME
 // =========================================================
 
-function playFromWelcome() {
+async function playFromWelcome() {
+
+
 
     console.log('PLAY BUTTON CLICKED')
 
+    const {
+    data,
+    error
+} =
+    await supabaseClient.functions.invoke(
+        'start-game',
+        {
+            body: {
+                player_name:
+                    playerUsername
+            }
+        }
+    )
+
+
+if (error || !data?.success) {
+
+    console.error(
+        'Failed to create game session:',
+        error || data
+    )
+
+    showWelcomeError(
+        'Failed to start game. Please try again.'
+    )
+
+    return
+}
+
+
+gameSessionId =
+    data.session_id
 
     // Jangan gunakan:
     // if (gameStarted) return
@@ -4794,59 +4828,59 @@ function renderLeaderboard(data) {
 
 async function addPlayerWin() {
 
-    if (!gameSessionId)
-        return false
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.functions.invoke(
-                'add-player-win',
-                {
-                    body: {
-                        session_id:
-                            gameSessionId
-                    }
-                }
-            )
-
-
-        if (error) {
-
-            console.error(
-                'Win error:',
-                error
-            )
-
-            return false
-        }
-
-
-        if (!data?.success) {
-
-            console.error(
-                'Win rejected:',
-                data?.error
-            )
-
-            return false
-        }
-
-
-        return true
-
-    } catch (error) {
+    if (!gameSessionId) {
 
         console.error(
+            'No game session'
+        )
+
+        return false
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.functions.invoke(
+            'add-player-win',
+            {
+                body: {
+                    session_id:
+                        gameSessionId
+                }
+            }
+        )
+
+
+    if (error) {
+
+        console.error(
+            'Add player win error:',
             error
         )
 
         return false
     }
+
+
+    if (!data?.success) {
+
+        console.error(
+            'Win rejected:',
+            data?.error
+        )
+
+        return false
+    }
+
+
+    console.log(
+        'WIN SAVED'
+    )
+
+
+    return true
 }
 // =========================================================
 // TEST SUPABASE
