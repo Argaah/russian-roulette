@@ -4,17 +4,16 @@
 // PART 1 / 2
 // =========================================================
 
-let gameSessionId = null
 
 // =========================================================
 // SUPABASE
 // =========================================================
 
 const SUPABASE_URL =
-    'https://kasewgqrkfjiqqjqdvjm.supabase.co'
+'https://kasewgqrkfjiqqjqdvjm.supabase.co'
 
 const SUPABASE_KEY =
-    'sb_publishable_YXo3nrxsvx_uwof30ogQVg_x-ufLtwY'
+'sb_publishable_YXo3nrxsvx_uwof30ogQVg_x-ufLtwY'
 
 
 let supabaseClient = null
@@ -23,17 +22,17 @@ let supabaseClient = null
 if (
     window.supabase &&
     typeof window.supabase.createClient ===
-        'function'
+    'function'
 ) {
-
+    
     supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        )
-
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    )
+    
 } else {
-
+    
     console.error(
         '❌ Supabase library was not loaded.'
     )
@@ -59,7 +58,7 @@ if (
 let gameSessionId = null
 
 let currentGameSessionId =
-    null
+null
 
 
 // =========================================================
@@ -67,7 +66,7 @@ let currentGameSessionId =
 // =========================================================
 
 const $ =
-    (id) =>
+(id) =>
         document.getElementById(id)
 
 
