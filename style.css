@@ -2210,8 +2210,9 @@ MOBILE
 
     #gun,
     #gunshotme {
-        transform: translateX(50px) translateY(-150px) scale(1.3);
-        background-size: auto 50%;
+        scale: 1.3;
+        transform: translateX(-100px) translateY(150px) scale(1.3);
+        background-size: auto 40%;
 
         background-repeat: no-repeat;
 
