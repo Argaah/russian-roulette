@@ -4276,18 +4276,10 @@ async function addPlayerWin() {
         '========== ADD PLAYER WIN =========='
     )
 
-
     console.log(
-        'playerUsername:',
-        playerUsername
+        'GAME SESSION:',
+        window.gameSessionId
     )
-
-
-    console.log(
-        'gameSessionId:',
-        gameSessionId
-    )
-
 
     if (!supabaseClient) {
 
@@ -4298,89 +4290,66 @@ async function addPlayerWin() {
         return false
     }
 
-
-    if (!gameSessionId) {
+    if (!window.gameSessionId) {
 
         console.error(
-            'gameSessionId kosong.'
+            'GAME SESSION TIDAK ADA'
         )
 
         return false
     }
 
-
     try {
-
-        const response =
-            await supabaseClient.functions.invoke(
-                'add-player-win',
-                {
-
-                    body: {
-
-                        session_id:
-                            gameSessionId
-
-                    },
-
-                    headers: {
-
-                        'x-game-session':
-                            gameSessionId
-
-                    }
-
-                }
-            )
-
-
-        console.log(
-            'ADD PLAYER WIN RESPONSE:',
-            response
-        )
-
 
         const {
             data,
             error
         } =
-            response
+            await supabaseClient.functions.invoke(
+                'add-player-win',
+                {
+                    body: {
+                        player_name:
+                            playerUsername,
 
+                        game_session_id:
+                            window.gameSessionId
+                    }
+                }
+            )
+
+        console.log(
+            'ADD-PLAYER-WIN RESPONSE:',
+            data
+        )
 
         if (error) {
 
             console.error(
-                'ADD PLAYER WIN ERROR:',
+                'ADD-PLAYER-WIN ERROR:',
                 error
             )
-
 
             if (error.context) {
 
                 try {
 
-                    const errorBody =
-                        await error.context.text()
-
-
                     console.error(
-                        'ADD PLAYER WIN ERROR BODY:',
-                        errorBody
+                        'ERROR BODY:',
+                        await error.context.text()
                     )
 
-                } catch (error) {
+                } catch (e) {
 
                     console.error(
-                        'Cannot read add-win error:',
-                        error
+                        'Tidak bisa membaca error body:',
+                        e
                     )
                 }
             }
 
-
             return false
         }
-
 
         if (
             !data ||
@@ -4395,14 +4364,11 @@ async function addPlayerWin() {
             return false
         }
 
-
         console.log(
             '✅ WIN BERHASIL DITAMBAHKAN'
         )
 
-
         await loadLeaderboard()
-
 
         return true
 
@@ -4412,7 +4378,6 @@ async function addPlayerWin() {
             'ADD PLAYER WIN EXCEPTION:',
             error
         )
-
 
         return false
     }
