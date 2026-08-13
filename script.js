@@ -4248,11 +4248,6 @@
 // MOBILE DETECTION
 // =====================================================
 
-const isMobileDevice =
-    window.matchMedia('(max-width: 768px)').matches ||
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0
-
 
 // =====================================================
 // PARALLAX STATE
